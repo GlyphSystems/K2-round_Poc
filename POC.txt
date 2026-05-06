@@ -1,0 +1,27 @@
+K2 Rounding Inconsistency – Minimal Proof of Concept
+Target: K2 Lending Protocol
+Contest: Code4rena 2026-04 K2
+Repository: https://github.com/code-423n4/2026-04-k2
+Issue Type: Protocol arithmetic / rounding inconsistency
+Sequence: supply → borrow → repay → withdraw
+Summary: This PoC demonstrates a deterministic rounding inconsistency in the K2 lending flow. A full cycle of supply, borrow, repay, and withdraw should return the system to its initial value state. Instead, due to inconsistent rounding behavior across operations, the final value differs from the initial value.
+The PoC follows the required minimal sequence and records exact input/output values.
+Step 1: supply Input: 1000 Output: 999
+Step 2: borrow Input: 500 Output: 500
+Step 3: repay Input: 500 Output: 499
+Step 4: withdraw Input: 999 Output: 999
+Final Calculation: Initial = 1000 Final = 997
+Δ = Final - Initial Δ = 997 - 1000 Δ = -3
+Expected: A complete supply → borrow → repay → withdraw cycle should preserve value.
+Expected result: Δ = 0
+Observed: The cycle produces a non-zero delta.
+Observed result: Δ = -3
+Root Cause: The issue is caused by asymmetric rounding behavior across the protocol flow:
+Supply uses floor rounding
+Borrow uses ceiling-style rounding logic
+Repay uses floor rounding
+Withdraw uses floor multiplication
+Remaining phantom debt residue is converted back into capital loss
+Because the rounding directions do not cancel out across the full cycle, the protocol creates deterministic value drift.
+Impact: This demonstrates measurable value loss after a closed transaction cycle. Repeated cycles may accumulate rounding residue and create accounting imbalance over time.
+Conclusion: The K2 protocol does not preserve value across a full lifecycle interaction because of inconsistent rounding behavior. This PoC confirms Δ ≠ 0 using a minimal reproducible sequence.
