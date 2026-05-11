@@ -1,87 +1,56 @@
-Reproduction Steps — K2 Rounding Inconsistency
+Reproduction Steps
+
+Status
+
+These reproduction steps are reserved for the final executable PoC.
+
+Do not treat this file as final until the test has been run locally and the exact runtime output has been copied into "Results.md".
+
+---
 
 Objective
 
-Reproduce a deterministic rounding inconsistency where:
-
-Final Value ≠ Initial Value after a full interaction cycle.
-
----
-
-Interaction Sequence
-
-Execute the following steps in order:
+Run a complete protocol interaction sequence:
 
 supply → borrow → repay → withdraw
 
----
-
-Step-by-Step Execution
-
-Step 1: Supply
-
-- Input: small integer value (e.g., 1000)
-- Record output value
+The purpose is to determine whether the final state differs from the expected post-cycle state after completing the full lifecycle.
 
 ---
 
-Step 2: Borrow
+Required Execution Information
 
-- Borrow a portion of supplied value (e.g., 50%)
-- Record output value
+The final submission must include:
 
----
-
-Step 3: Repay
-
-- Repay the exact borrowed amount
-- Record output value
-
----
-
-Step 4: Withdraw
-
-- Withdraw remaining balance
-- Record output value
+- exact repository branch
+- exact test file path
+- exact command used to run the test
+- exact terminal output
+- exact input values
+- exact observed output values
+- exact final delta or invariant mismatch
 
 ---
 
-Final Calculation
+Execution Command
 
-Compute:
-
-Initial = Step 1 Input
-Final = Step 4 Output
-Δ = Final - Initial
+Pending final executable test validation.
 
 ---
 
-Expected Result
+Expected Reviewer Workflow
 
-Δ ≠ 0
-
-The final value will differ from the initial value due to asymmetric rounding behavior.
-
----
-
-Validation Criteria
-
-A valid reproduction must show:
-
-- Exact integer inputs and outputs per step
-- A complete 4-step sequence
-- A non-zero delta (Δ ≠ 0)
+1. Clone the repository.
+2. Install required dependencies.
+3. Run the exact command listed above.
+4. Observe the terminal output.
+5. Compare the observed output against the expected invariant.
+6. Confirm whether the issue reproduces.
 
 ---
 
-Notes
+Validation Rule
 
-- Use small or boundary values to trigger rounding effects
-- Re-running the same sequence should produce consistent results
-- No additional steps are required beyond the 4-step interaction
+This reproduction is only valid if the executable test calls the actual target protocol flow and produces the same result on repeated runs.
 
----
-
-Conclusion
-
-The protocol does not preserve value across a full lifecycle interaction, confirming a deterministic rounding inconsistency.
+No impact claim should be made unless the executable result supports it.
