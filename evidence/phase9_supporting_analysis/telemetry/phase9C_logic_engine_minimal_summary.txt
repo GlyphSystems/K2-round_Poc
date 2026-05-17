@@ -1,0 +1,518 @@
+PHASE 9C — LOGIC ENGINE MINIMAL RESIDUE REPRODUCTION SUMMARY
+============================================================
+
+started_at: 2026-05-15T09:31:28
+ended_at: 2026-05-15T09:31:29
+elapsed_seconds: 0.5963
+
+RUN CONFIGURATION
+------------------------------------------------------------
+start_input: 1
+end_input: 10000
+max_repeat_cycles: 25
+total_inputs_tested: 10000
+total_sequences_tested: 250000
+total_minimal_hits: 250000
+
+FIRST MINIMAL HIT
+------------------------------------------------------------
+input_value: 1
+repeat_cycles: 1
+supplied_capital: 1
+shares_received: 0
+borrowed_capital: 0
+debt_shares_minted: 0
+repaid_capital: 0
+debt_shares_burned: 0
+withdrawn_capital: 0
+phantom_debt_shares: 0
+phantom_debt_value: 0
+final_output: 0
+delta: -1
+accumulated_delta: -1
+accumulated_phantom_debt_shares: 0
+accumulated_phantom_debt_value: 0
+reason: minimal_delta_nonzero;minimal_final_output_less_than_input;single_cycle_reproduction
+
+TOP MINIMAL HITS
+------------------------------------------------------------
+
+TOP_MINIMAL_HIT_1
+input_value: 2
+repeat_cycles: 25
+supplied_capital: 2
+shares_received: 1
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 1
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: -1
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_2
+input_value: 3
+repeat_cycles: 25
+supplied_capital: 3
+shares_received: 2
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 2
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 0
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_3
+input_value: 4
+repeat_cycles: 25
+supplied_capital: 4
+shares_received: 3
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 3
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 1
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_4
+input_value: 5
+repeat_cycles: 25
+supplied_capital: 5
+shares_received: 4
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 4
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 2
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_5
+input_value: 6
+repeat_cycles: 25
+supplied_capital: 6
+shares_received: 5
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 5
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 3
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_6
+input_value: 2
+repeat_cycles: 24
+supplied_capital: 2
+shares_received: 1
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 1
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: -1
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_7
+input_value: 7
+repeat_cycles: 25
+supplied_capital: 7
+shares_received: 6
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 6
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 4
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_8
+input_value: 3
+repeat_cycles: 24
+supplied_capital: 3
+shares_received: 2
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 2
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 0
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_9
+input_value: 8
+repeat_cycles: 25
+supplied_capital: 8
+shares_received: 7
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 7
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 5
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_10
+input_value: 4
+repeat_cycles: 24
+supplied_capital: 4
+shares_received: 3
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 3
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 1
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_11
+input_value: 9
+repeat_cycles: 25
+supplied_capital: 9
+shares_received: 8
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 8
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 6
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_12
+input_value: 5
+repeat_cycles: 24
+supplied_capital: 5
+shares_received: 4
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 4
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 2
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_13
+input_value: 10
+repeat_cycles: 25
+supplied_capital: 10
+shares_received: 9
+borrowed_capital: 5
+debt_shares_minted: 5
+repaid_capital: 5
+debt_shares_burned: 4
+withdrawn_capital: 9
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 7
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_14
+input_value: 6
+repeat_cycles: 24
+supplied_capital: 6
+shares_received: 5
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 5
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 3
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_15
+input_value: 11
+repeat_cycles: 25
+supplied_capital: 11
+shares_received: 10
+borrowed_capital: 5
+debt_shares_minted: 5
+repaid_capital: 5
+debt_shares_burned: 4
+withdrawn_capital: 10
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 8
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_16
+input_value: 2
+repeat_cycles: 23
+supplied_capital: 2
+shares_received: 1
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 1
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: -1
+delta: -3
+accumulated_delta: -69
+accumulated_phantom_debt_shares: 23
+accumulated_phantom_debt_value: 46
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_17
+input_value: 7
+repeat_cycles: 24
+supplied_capital: 7
+shares_received: 6
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 6
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 4
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_18
+input_value: 12
+repeat_cycles: 25
+supplied_capital: 12
+shares_received: 11
+borrowed_capital: 6
+debt_shares_minted: 6
+repaid_capital: 6
+debt_shares_burned: 5
+withdrawn_capital: 11
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 9
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_19
+input_value: 3
+repeat_cycles: 23
+supplied_capital: 3
+shares_received: 2
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 2
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 0
+delta: -3
+accumulated_delta: -69
+accumulated_phantom_debt_shares: 23
+accumulated_phantom_debt_value: 46
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_20
+input_value: 8
+repeat_cycles: 24
+supplied_capital: 8
+shares_received: 7
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 7
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 5
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_21
+input_value: 13
+repeat_cycles: 25
+supplied_capital: 13
+shares_received: 12
+borrowed_capital: 6
+debt_shares_minted: 6
+repaid_capital: 6
+debt_shares_burned: 5
+withdrawn_capital: 12
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 10
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_22
+input_value: 4
+repeat_cycles: 23
+supplied_capital: 4
+shares_received: 3
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 3
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 1
+delta: -3
+accumulated_delta: -69
+accumulated_phantom_debt_shares: 23
+accumulated_phantom_debt_value: 46
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_23
+input_value: 9
+repeat_cycles: 24
+supplied_capital: 9
+shares_received: 8
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 8
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 6
+delta: -3
+accumulated_delta: -72
+accumulated_phantom_debt_shares: 24
+accumulated_phantom_debt_value: 48
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_24
+input_value: 14
+repeat_cycles: 25
+supplied_capital: 14
+shares_received: 13
+borrowed_capital: 7
+debt_shares_minted: 7
+repaid_capital: 7
+debt_shares_burned: 6
+withdrawn_capital: 13
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 11
+delta: -3
+accumulated_delta: -75
+accumulated_phantom_debt_shares: 25
+accumulated_phantom_debt_value: 50
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+TOP_MINIMAL_HIT_25
+input_value: 5
+repeat_cycles: 23
+supplied_capital: 5
+shares_received: 4
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 4
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 2
+delta: -3
+accumulated_delta: -69
+accumulated_phantom_debt_shares: 23
+accumulated_phantom_debt_value: 46
+reason: minimal_delta_nonzero;minimal_phantom_debt_shares;minimal_phantom_debt_value;minimal_final_output_less_than_input
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9C_logic_engine_minimal_summary.txt
+hits_file: phase9C_logic_engine_minimal_hits.csv

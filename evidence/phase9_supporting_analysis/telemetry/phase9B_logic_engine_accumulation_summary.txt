@@ -1,0 +1,172 @@
+PHASE 9B — LOGIC ENGINE RESIDUE ACCUMULATION SUMMARY
+============================================================
+
+started_at: 2026-05-15T08:57:42
+ended_at: 2026-05-15T08:57:42
+elapsed_seconds: 0.0003
+
+RUN CONFIGURATION
+------------------------------------------------------------
+test_inputs: [2, 3, 4, 5, 10, 25, 50, 100, 1000, 10000, 100000, 250000]
+cycles_per_input: 100000
+total_inputs_tested: 12
+total_cycles_tested: 1200000
+total_accumulation_hits: 12
+
+AGGREGATE COUNTS
+------------------------------------------------------------
+delta_nonzero_input_cases: 12
+phantom_debt_share_input_cases: 12
+phantom_debt_value_input_cases: 12
+
+TOP ACCUMULATION HITS
+------------------------------------------------------------
+
+TOP_ACCUMULATION_HIT_1
+input_value: 2
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: -100000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_2
+input_value: 3
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 0
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_3
+input_value: 4
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 100000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_4
+input_value: 5
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 200000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_5
+input_value: 10
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_6
+input_value: 25
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 2200000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_7
+input_value: 50
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 4700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_8
+input_value: 100
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 9700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_9
+input_value: 1000
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 99700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_10
+input_value: 10000
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 999700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_11
+input_value: 100000
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 9999700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+TOP_ACCUMULATION_HIT_12
+input_value: 250000
+cycles: 100000
+per_cycle_delta: -3
+total_delta: -300000
+per_cycle_phantom_debt_shares: 1
+total_phantom_debt_shares: 100000
+per_cycle_phantom_debt_value: 2
+total_phantom_debt_value: 200000
+final_virtual_output: 24999700000
+reason: per_cycle_delta_nonzero;total_delta_nonzero;phantom_debt_shares_accumulate;phantom_debt_value_accumulate;final_output_less_than_total_input
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9B_logic_engine_accumulation_summary.txt
+hits_file: phase9B_logic_engine_accumulation_hits.csv

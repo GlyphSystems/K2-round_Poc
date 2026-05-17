@@ -1,0 +1,284 @@
+PHASE 9I — LOGIC ENGINE EXTRACTION PATH MODEL SUMMARY
+============================================================
+
+started_at: 2026-05-15T14:57:54
+ended_at: 2026-05-15T14:58:00
+elapsed_seconds: 5.8837
+
+RUN CONFIGURATION
+------------------------------------------------------------
+signatures_tested: 6
+chain_windows: [1, 2, 5, 10, 25, 100, 1000]
+reentry_windows: [1, 2, 5, 10, 25, 100]
+index_drift_patterns: [(1, 1), (3, 7), (11, 17), (31, 67), (123, 456), (8191, 8191)]
+total_paths_tested: 1512
+
+AGGREGATE RESULTS
+------------------------------------------------------------
+total_hits: 1512
+extraction_candidate_count: 1512
+insolvency_candidate_count: 1512
+over_50_percent_external_value_count: 1512
+over_90_percent_external_value_count: 1008
+strongest_net_external_position: 9800999900000
+strongest_residual_debt_value: 9801000200000
+strongest_protocol_shortfall_model: 300000
+strongest_extraction_ratio_ppm: 980099
+
+TOP EXTRACTION PATH SNAPSHOT
+------------------------------------------------------------
+
+TOP_EXTRACTION_PATH_1
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 1
+borrow_drift_step: 1
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_2
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 3
+borrow_drift_step: 7
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_3
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 11
+borrow_drift_step: 17
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_4
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 31
+borrow_drift_step: 67
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_5
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 123
+borrow_drift_step: 456
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_6
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 8191
+borrow_drift_step: 8191
+total_supplied: 10000000000000
+total_borrowed: 9900000000000
+total_repaid: 99000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9900000000000
+total_debt_burned: 98999900000
+residual_debt_shares: 9801000100000
+residual_debt_value: 9801000200000
+external_value_moved: 19899999900000
+net_external_position: 9800999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 980099
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_7
+signature_id: 2
+input_value: 100000000
+borrow_ratio: 19/20
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 1
+borrow_drift_step: 1
+total_supplied: 10000000000000
+total_borrowed: 9500000000000
+total_repaid: 95000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9500000000000
+total_debt_burned: 94999900000
+residual_debt_shares: 9405000100000
+residual_debt_value: 9405000200000
+external_value_moved: 19499999900000
+net_external_position: 9404999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 940499
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_8
+signature_id: 2
+input_value: 100000000
+borrow_ratio: 19/20
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 3
+borrow_drift_step: 7
+total_supplied: 10000000000000
+total_borrowed: 9500000000000
+total_repaid: 95000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9500000000000
+total_debt_burned: 94999900000
+residual_debt_shares: 9405000100000
+residual_debt_value: 9405000200000
+external_value_moved: 19499999900000
+net_external_position: 9404999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 940499
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_9
+signature_id: 2
+input_value: 100000000
+borrow_ratio: 19/20
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 11
+borrow_drift_step: 17
+total_supplied: 10000000000000
+total_borrowed: 9500000000000
+total_repaid: 95000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9500000000000
+total_debt_burned: 94999900000
+residual_debt_shares: 9405000100000
+residual_debt_value: 9405000200000
+external_value_moved: 19499999900000
+net_external_position: 9404999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 940499
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+TOP_EXTRACTION_PATH_10
+signature_id: 2
+input_value: 100000000
+borrow_ratio: 19/20
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+liquidity_drift_step: 31
+borrow_drift_step: 67
+total_supplied: 10000000000000
+total_borrowed: 9500000000000
+total_repaid: 95000000000
+total_withdrawn: 9999999900000
+total_debt_minted: 9500000000000
+total_debt_burned: 94999900000
+residual_debt_shares: 9405000100000
+residual_debt_value: 9405000200000
+external_value_moved: 19499999900000
+net_external_position: 9404999900000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 940499
+extraction_candidate: True
+insolvency_candidate: True
+reason: NET_EXTERNAL_VALUE_POSITIVE;RESIDUAL_DEBT_VALUE_PERSISTS;PROTOCOL_SHORTFALL_MODEL_POSITIVE;EXTERNAL_VALUE_OVER_10_PERCENT;EXTERNAL_VALUE_OVER_50_PERCENT;EXTERNAL_VALUE_OVER_90_PERCENT
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9I_logic_engine_extraction_path_summary.txt
+hits_file: phase9I_logic_engine_extraction_path_hits.csv

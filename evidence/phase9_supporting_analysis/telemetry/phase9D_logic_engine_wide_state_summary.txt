@@ -1,0 +1,245 @@
+PHASE 9D — LOGIC ENGINE WIDE STATE SWEEP SUMMARY
+============================================================
+
+started_at: 2026-05-15T11:08:00
+ended_at: 2026-05-15T11:08:01
+elapsed_seconds: 0.2677
+
+RUN CONFIGURATION
+------------------------------------------------------------
+scenario_target: 1000000
+total_scenarios_tested: 85176
+input_values: [2, 3, 4, 5, 10, 25, 50, 100, 1000, 10000, 100000, 250000, 1000000, 10000000]
+borrow_ratios: [(1, 4), (1, 3), (1, 2), (2, 3), (3, 4), (9, 10)]
+repay_ratios: [(1, 4), (1, 3), (1, 2), (2, 3), (3, 4), (1, 1)]
+liquidity_offsets: [0, 1, 2, 3, 7, 11, 17, 31, 67, 123, 255, 511, 1023]
+borrow_offsets: [0, 1, 2, 3, 7, 11, 17, 31, 67, 123, 255, 456, 1023]
+
+AGGREGATE RESULTS
+------------------------------------------------------------
+total_hits: 82053
+delta_nonzero_count: 82053
+phantom_debt_count: 81081
+final_output_less_than_input_count: 82053
+minted_debt_exceeds_burned_count: 81081
+strongest_abs_delta: 6750003
+strongest_loss_ratio_ppm: 1500000
+strongest_phantom_debt_value: 6750002
+
+TOP HIT SNAPSHOT
+------------------------------------------------------------
+
+TOP_HIT_1
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 1
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_2
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 2
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_3
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 3
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_4
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 7
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_5
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 11
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_6
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 17
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_7
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 31
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_8
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 67
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_9
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 123
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+TOP_HIT_10
+rank_score: 20925006
+input_value: 10000000
+borrow_ratio: 9/10
+repay_ratio: 1/4
+liquidity_offset: 1
+borrow_offset: 255
+supplied_capital: 10000000
+shares_received: 9999999
+borrowed_capital: 9000000
+debt_shares_minted: 9000000
+repaid_capital: 2250000
+debt_shares_burned: 2249999
+withdrawn_capital: 9999999
+phantom_debt_shares: 6750001
+phantom_debt_value: 6750002
+final_output: 3249997
+delta: -6750003
+loss_ratio_ppm: 675000
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9D_logic_engine_wide_state_summary.txt
+top_hits_file: phase9D_logic_engine_wide_state_top_hits.csv

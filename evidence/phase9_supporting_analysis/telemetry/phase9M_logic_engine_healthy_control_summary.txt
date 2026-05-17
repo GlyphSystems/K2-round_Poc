@@ -1,0 +1,289 @@
+PHASE 9M — LOGIC ENGINE HEALTHY-CONTROL / COUNTERFACTUAL SUMMARY
+============================================================
+
+started_at: 2026-05-16T08:11:15
+ended_at: 2026-05-16T08:11:19
+elapsed_seconds: 3.9297
+stopped_by_runtime_cap: False
+
+RUN CONFIGURATION
+------------------------------------------------------------
+max_runtime_seconds: 180
+input_values: [100, 1000, 10000, 100000, 1000000, 10000000]
+healthy_borrow_ratios: [(1, 10), (1, 4), (1, 3), (1, 2)]
+healthy_repay_ratios: [(1, 1), (99, 100), (9, 10), (3, 4)]
+pathological_borrow_ratios: [(2, 3), (3, 4), (9, 10), (19, 20), (99, 100)]
+pathological_repay_ratios: [(1, 100), (1, 20), (1, 10), (1, 4)]
+chain_windows: [1, 2, 5, 10, 25]
+reentry_windows: [1, 2, 5, 10]
+index_drift_patterns: [(1, 1), (31, 67), (123, 456), (8191, 8191)]
+constraint_modes: ['loose', 'health_checked', 'withdraw_guarded', 'repay_required_before_withdraw', 'full_protocol_guard']
+total_paths_tested: 86400
+
+HEALTHY CONTROL RESULTS
+------------------------------------------------------------
+healthy_paths_tested: 38400
+healthy_pass_count: 0
+healthy_false_positive_count: 38400
+
+PATHOLOGICAL CONTROL RESULTS
+------------------------------------------------------------
+pathological_paths_tested: 48000
+pathological_signal_count: 48000
+pathological_no_signal_count: 0
+
+CONSTRAINT RESULTS
+------------------------------------------------------------
+rejected_by_constraints_count: 12000
+
+COUNTERFACTUAL INTERPRETATION
+------------------------------------------------------------
+COUNTERFACTUAL_STATUS: PARTIAL_SEPARATION_WITH_HEALTHY_FALSE_POSITIVES
+
+TOP RESULT SNAPSHOT
+------------------------------------------------------------
+
+TOP_RESULT_1
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 416666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1250000250
+residual_debt_value: 1250000500
+net_external_position: -1250000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 500000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT;PATHOLOGICAL_VALUE_RATIO_OVER_50_PERCENT
+
+TOP_RESULT_2
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 416666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1250000250
+residual_debt_value: 1250000500
+net_external_position: -1250000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 500000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT;PATHOLOGICAL_VALUE_RATIO_OVER_50_PERCENT
+
+TOP_RESULT_3
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 416666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1250000250
+residual_debt_value: 1250000500
+net_external_position: -1250000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 500000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT;PATHOLOGICAL_VALUE_RATIO_OVER_50_PERCENT
+
+TOP_RESULT_4
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 416666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1250000250
+residual_debt_value: 1250000500
+net_external_position: -1250000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 500000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT;PATHOLOGICAL_VALUE_RATIO_OVER_50_PERCENT
+
+TOP_RESULT_5
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1875000000
+total_repaid: 468750000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1406250250
+residual_debt_value: 1406250500
+net_external_position: -1093750000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 437500
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+TOP_RESULT_6
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1875000000
+total_repaid: 468750000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1406250250
+residual_debt_value: 1406250500
+net_external_position: -1093750000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 437500
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+TOP_RESULT_7
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1875000000
+total_repaid: 468750000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1406250250
+residual_debt_value: 1406250500
+net_external_position: -1093750000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 437500
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+TOP_RESULT_8
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1875000000
+total_repaid: 468750000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1406250250
+residual_debt_value: 1406250500
+net_external_position: -1093750000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 437500
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+TOP_RESULT_9
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/10
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 166666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1500000250
+residual_debt_value: 1500000500
+net_external_position: -1000000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 400000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+TOP_RESULT_10
+flow_type: pathological_control
+input_value: 10000000
+borrow_ratio: 2/3
+repay_ratio: 1/10
+chain_window: 25
+reentry_window: 10
+constraint_mode: full_protocol_guard
+total_supplied: 2500000000
+total_borrowed: 1666666500
+total_repaid: 166666500
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 250
+residual_debt_shares: 1500000250
+residual_debt_value: 1500000500
+net_external_position: -1000000000
+protocol_shortfall_model: 2500000500
+value_ratio_ppm: 400000
+healthy_pass: False
+pathological_signal: True
+false_positive_risk: False
+reason: PATHOLOGICAL_RESIDUAL_DEBT_PRESENT;PATHOLOGICAL_SHORTFALL_POSITIVE;PATHOLOGICAL_VALUE_RATIO_OVER_10_PERCENT
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9M_logic_engine_healthy_control_summary.txt
+results_file: phase9M_logic_engine_healthy_control_results.csv

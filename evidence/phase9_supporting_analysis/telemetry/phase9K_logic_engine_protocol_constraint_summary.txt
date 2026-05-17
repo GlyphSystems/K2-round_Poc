@@ -1,0 +1,298 @@
+PHASE 9K — LOGIC ENGINE PROTOCOL-CONSTRAINT TRANSLATION SUMMARY
+============================================================
+
+started_at: 2026-05-16T06:45:24
+ended_at: 2026-05-16T06:49:24
+elapsed_seconds: 240.077
+stopped_by_runtime_cap: True
+
+RUN CONFIGURATION
+------------------------------------------------------------
+max_runtime_seconds: 240
+input_values: [100000, 1000000, 10000000, 100000000]
+borrow_ratios: [(1, 2), (2, 3), (3, 4), (9, 10), (19, 20), (99, 100)]
+repay_ratios: [(1, 100), (1, 20), (1, 10), (1, 4), (1, 2), (3, 4), (9, 10), (99, 100), (1, 1)]
+chain_windows: [1, 5, 25, 100, 1000]
+reentry_windows: [1, 5, 25, 100]
+index_drift_patterns: [(1, 1), (31, 67), (123, 456), (8191, 8191)]
+constraint_modes: ['loose', 'health_checked', 'withdraw_guarded', 'repay_required_before_withdraw', 'full_protocol_guard']
+total_paths_tested: 30795
+
+AGGREGATE RESULTS
+------------------------------------------------------------
+survived_constraints_count: 30795
+extraction_candidate_count: 10398
+shortfall_candidate_count: 30795
+rejected_by_constraints_count: 3360
+over_50_percent_count: 4000
+over_90_percent_count: 480
+strongest_net_external_position: 74249900000
+strongest_residual_debt_value: 74250200000
+strongest_protocol_shortfall_model: 100000200000
+strongest_extraction_ratio_ppm: 980090
+
+SURVIVAL BY CONSTRAINT MODE
+------------------------------------------------------------
+full_protocol_guard: 6159
+health_checked: 6159
+loose: 6159
+repay_required_before_withdraw: 6159
+withdraw_guarded: 6159
+
+EXTRACTION BY CONSTRAINT MODE
+------------------------------------------------------------
+health_checked: 4879
+loose: 5519
+
+REJECTION BY CONSTRAINT MODE
+------------------------------------------------------------
+full_protocol_guard: 2640
+health_checked: 720
+
+TOP PROTOCOL-CONSTRAINT SNAPSHOT
+------------------------------------------------------------
+
+TOP_CONSTRAINT_HIT_1
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 16666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 50000100000
+residual_debt_value: 50000200000
+net_external_position: -50000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 500000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE;EXTERNAL_VALUE_OVER_50_PERCENT
+
+TOP_CONSTRAINT_HIT_2
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 16666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 50000100000
+residual_debt_value: 50000200000
+net_external_position: -50000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 500000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE;EXTERNAL_VALUE_OVER_50_PERCENT
+
+TOP_CONSTRAINT_HIT_3
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 16666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 50000100000
+residual_debt_value: 50000200000
+net_external_position: -50000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 500000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE;EXTERNAL_VALUE_OVER_50_PERCENT
+
+TOP_CONSTRAINT_HIT_4
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 16666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 50000100000
+residual_debt_value: 50000200000
+net_external_position: -50000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 500000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE;EXTERNAL_VALUE_OVER_50_PERCENT
+
+TOP_CONSTRAINT_HIT_5
+input_value: 1000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 75000000000
+total_repaid: 18750000000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 56250100000
+residual_debt_value: 56250200000
+net_external_position: -43750000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 437500
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+TOP_CONSTRAINT_HIT_6
+input_value: 1000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 75000000000
+total_repaid: 18750000000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 56250100000
+residual_debt_value: 56250200000
+net_external_position: -43750000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 437500
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+TOP_CONSTRAINT_HIT_7
+input_value: 1000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 75000000000
+total_repaid: 18750000000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 56250100000
+residual_debt_value: 56250200000
+net_external_position: -43750000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 437500
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+TOP_CONSTRAINT_HIT_8
+input_value: 1000000
+borrow_ratio: 3/4
+repay_ratio: 1/4
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 75000000000
+total_repaid: 18750000000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 56250100000
+residual_debt_value: 56250200000
+net_external_position: -43750000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 437500
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+TOP_CONSTRAINT_HIT_9
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/10
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 6666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 60000100000
+residual_debt_value: 60000200000
+net_external_position: -40000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 400000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+TOP_CONSTRAINT_HIT_10
+input_value: 1000000
+borrow_ratio: 2/3
+repay_ratio: 1/10
+chain_window: 1000
+reentry_window: 100
+constraint_mode: full_protocol_guard
+total_supplied: 100000000000
+total_borrowed: 66666600000
+total_repaid: 6666600000
+total_withdrawn: 0
+total_rejected_borrows: 0
+total_rejected_withdraws: 100000
+residual_debt_shares: 60000100000
+residual_debt_value: 60000200000
+net_external_position: -40000000000
+protocol_shortfall_model: 100000200000
+extraction_ratio_ppm: 400000
+survived_constraints: True
+extraction_candidate: False
+shortfall_candidate: True
+rejected_by_constraints: True
+reason: WITHDRAW_REJECTED_BY_CONSTRAINTS;RESIDUAL_DEBT_SURVIVED_CONSTRAINTS;PROTOCOL_SHORTFALL_POSITIVE
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9K_logic_engine_protocol_constraint_summary.txt
+hits_file: phase9K_logic_engine_protocol_constraint_hits.csv

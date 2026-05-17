@@ -1,0 +1,369 @@
+PHASE 9E — LOGIC ENGINE 10M SIGNATURE SCOUT SUMMARY
+============================================================
+
+started_at: 2026-05-15T11:31:23
+ended_at: 2026-05-15T11:32:17
+elapsed_seconds: 54.1912
+
+RUN CONFIGURATION
+------------------------------------------------------------
+scenario_target: 10000000
+total_scenarios_tested: 10000000
+top_hit_limit: 100
+unique_signature_limit: 100
+
+AGGREGATE RESULTS
+------------------------------------------------------------
+total_hits: 9633326
+unique_signatures_found: 2469
+delta_nonzero_count: 9633326
+phantom_debt_count: 9633326
+final_output_less_than_input_count: 9633326
+minted_debt_exceeds_burned_count: 9633326
+loss_over_10_percent_count: 7726785
+loss_over_50_percent_count: 4426858
+strongest_abs_delta: 98010003
+strongest_loss_ratio_ppm: 1500000
+strongest_phantom_debt_value: 98010002
+
+TOP HIT SNAPSHOT
+------------------------------------------------------------
+
+TOP_HIT_1
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 191
+borrow_offset: 174
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_2
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 411
+borrow_offset: 372
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_3
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 242
+borrow_offset: 374
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_4
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 73
+borrow_offset: 183
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_5
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 391
+borrow_offset: 381
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_6
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 223
+borrow_offset: 190
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_7
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 57
+borrow_offset: 192
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_8
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 282
+borrow_offset: 390
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_9
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 223
+borrow_offset: 199
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP_HIT_10
+rank_score: 295010106
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+liquidity_offset: 478
+borrow_offset: 397
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+reason: phantom_debt_shares;phantom_debt_value;delta_nonzero;final_output_less_than_input;minted_debt_exceeds_burned_debt;loss_ratio_over_10_percent;loss_ratio_over_50_percent
+
+TOP UNIQUE SIGNATURE SNAPSHOT
+------------------------------------------------------------
+
+SIGNATURE_1
+signature: borrow=99/100|repay=1/100|delta_bucket=98010|phantom_bucket=98010|loss_bucket=98|debt_residue=yes
+count: 3334
+best_rank_score: 295010106
+best_input_value: 100000000
+best_delta: -98010003
+best_loss_ratio_ppm: 980100
+best_phantom_debt_value: 98010002
+example_borrow_ratio: 99/100
+example_repay_ratio: 1/100
+
+SIGNATURE_2
+signature: borrow=19/20|repay=1/100|delta_bucket=94050|phantom_bucket=94050|loss_bucket=94|debt_residue=yes
+count: 3334
+best_rank_score: 283090506
+best_input_value: 100000000
+best_delta: -94050003
+best_loss_ratio_ppm: 940500
+best_phantom_debt_value: 94050002
+example_borrow_ratio: 19/20
+example_repay_ratio: 1/100
+
+SIGNATURE_3
+signature: borrow=99/100|repay=1/20|delta_bucket=94050|phantom_bucket=94050|loss_bucket=94|debt_residue=yes
+count: 3334
+best_rank_score: 283090506
+best_input_value: 100000000
+best_delta: -94050003
+best_loss_ratio_ppm: 940500
+best_phantom_debt_value: 94050002
+example_borrow_ratio: 99/100
+example_repay_ratio: 1/20
+
+SIGNATURE_4
+signature: borrow=19/20|repay=1/20|delta_bucket=90250|phantom_bucket=90250|loss_bucket=90|debt_residue=yes
+count: 3334
+best_rank_score: 271652506
+best_input_value: 100000000
+best_delta: -90250003
+best_loss_ratio_ppm: 902500
+best_phantom_debt_value: 90250002
+example_borrow_ratio: 19/20
+example_repay_ratio: 1/20
+
+SIGNATURE_5
+signature: borrow=9/10|repay=1/100|delta_bucket=89100|phantom_bucket=89100|loss_bucket=89|debt_residue=yes
+count: 3334
+best_rank_score: 268191006
+best_input_value: 100000000
+best_delta: -89100003
+best_loss_ratio_ppm: 891000
+best_phantom_debt_value: 89100002
+example_borrow_ratio: 9/10
+example_repay_ratio: 1/100
+
+SIGNATURE_6
+signature: borrow=99/100|repay=1/10|delta_bucket=89100|phantom_bucket=89100|loss_bucket=89|debt_residue=yes
+count: 3334
+best_rank_score: 268191006
+best_input_value: 100000000
+best_delta: -89100003
+best_loss_ratio_ppm: 891000
+best_phantom_debt_value: 89100002
+example_borrow_ratio: 99/100
+example_repay_ratio: 1/10
+
+SIGNATURE_7
+signature: borrow=9/10|repay=1/20|delta_bucket=85500|phantom_bucket=85500|loss_bucket=85|debt_residue=yes
+count: 3334
+best_rank_score: 257355006
+best_input_value: 100000000
+best_delta: -85500003
+best_loss_ratio_ppm: 855000
+best_phantom_debt_value: 85500002
+example_borrow_ratio: 9/10
+example_repay_ratio: 1/20
+
+SIGNATURE_8
+signature: borrow=19/20|repay=1/10|delta_bucket=85500|phantom_bucket=85500|loss_bucket=85|debt_residue=yes
+count: 3334
+best_rank_score: 257355006
+best_input_value: 100000000
+best_delta: -85500003
+best_loss_ratio_ppm: 855000
+best_phantom_debt_value: 85500002
+example_borrow_ratio: 19/20
+example_repay_ratio: 1/10
+
+SIGNATURE_9
+signature: borrow=9/10|repay=1/10|delta_bucket=81000|phantom_bucket=81000|loss_bucket=81|debt_residue=yes
+count: 3334
+best_rank_score: 243810006
+best_input_value: 100000000
+best_delta: -81000003
+best_loss_ratio_ppm: 810000
+best_phantom_debt_value: 81000002
+example_borrow_ratio: 9/10
+example_repay_ratio: 1/10
+
+SIGNATURE_10
+signature: borrow=4/5|repay=1/100|delta_bucket=79200|phantom_bucket=79200|loss_bucket=79|debt_residue=yes
+count: 3334
+best_rank_score: 238392006
+best_input_value: 100000000
+best_delta: -79200003
+best_loss_ratio_ppm: 792000
+best_phantom_debt_value: 79200002
+example_borrow_ratio: 4/5
+example_repay_ratio: 1/100
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9E_logic_engine_10m_summary.txt
+top_hits_file: phase9E_logic_engine_10m_top_hits.csv
+unique_signatures_file: phase9E_logic_engine_10m_unique_signatures.csv

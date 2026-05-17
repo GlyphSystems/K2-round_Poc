@@ -1,0 +1,43 @@
+PHASE 9H — LOGIC ENGINE 3-MINUTE PROTOCOL REALISM SUMMARY
+============================================================
+
+started_at: 2026-05-15T14:10:01
+ended_at: 2026-05-15T14:13:01
+elapsed_seconds: 180.0005
+
+RUN CONFIGURATION
+------------------------------------------------------------
+run_seconds: 180
+checkpoint_interval_seconds: 15
+signatures_tested: 6
+index_drift_patterns: 6
+
+FINAL AGGREGATE STATE
+------------------------------------------------------------
+cycles_completed: 113636644
+total_supplied: 11363664400000000
+total_borrowed: 10928057268000000
+total_repaid: 425001045240000
+total_withdrawn: 11363664286363356
+total_supply_shares: 11363664286363356
+total_debt_shares_minted: 10928057268000000
+total_debt_shares_burned: 425000931603356
+total_phantom_debt_shares: 10503056336396644
+total_phantom_debt_value: 10503056450033288
+total_delta: -10503056563669932
+final_loss_ratio_ppm: 924266
+max_single_delta: 98010003
+max_single_phantom_value: 98010002
+over_50_percent_count: 113636644
+over_90_percent_count: 75757764
+
+INTERPRETATION FLAGS
+------------------------------------------------------------
+CHAIN_DELTA_NONZERO: true
+PHANTOM_VALUE_PERSISTED: true
+OVER_90_PERCENT_MODEL_PRESENT: true
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9H_logic_engine_protocol_realism_summary.txt
+checkpoint_file: phase9H_logic_engine_protocol_realism_checkpoints.csv

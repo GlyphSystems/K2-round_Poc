@@ -1,0 +1,227 @@
+PHASE 9J — LOGIC ENGINE BOUNDARY / COLLAPSE ANALYSIS SUMMARY
+FAST-SAFE VERSION
+============================================================
+
+started_at: 2026-05-16T06:08:54
+ended_at: 2026-05-16T06:13:54
+elapsed_seconds: 300.0195
+stopped_by_runtime_cap: True
+
+RUN CONFIGURATION
+------------------------------------------------------------
+max_runtime_seconds: 300
+input_values: [10000, 100000, 1000000, 10000000, 100000000]
+borrow_ratios: [(1, 4), (1, 2), (2, 3), (3, 4), (9, 10), (19, 20), (99, 100)]
+repay_ratios: [(1, 100), (1, 20), (1, 10), (1, 4), (1, 2), (3, 4), (9, 10), (99, 100), (1, 1)]
+chain_windows: [1, 5, 25, 100, 1000]
+reentry_windows: [1, 5, 25, 100]
+index_drift_patterns: [(1, 1), (31, 67), (123, 456), (8191, 8191)]
+reset_modes: ['none', 'repay_normalization', 'withdraw_normalization', 'debt_flush_attempt']
+total_paths_tested: 44454
+
+AGGREGATE RESULTS
+------------------------------------------------------------
+survived_count: 44454
+collapsed_count: 11113
+neutralized_count: 0
+over_50_percent_count: 3040
+over_90_percent_count: 640
+strongest_net_external_position: 49499900000
+strongest_residual_debt_value: 49500200000
+strongest_protocol_shortfall_model: 49500500000
+strongest_extraction_ratio_ppm: 980090
+
+SURVIVAL BY REPAY RATIO
+------------------------------------------------------------
+1/1: 4800
+1/10: 5120
+1/100: 5120
+1/2: 4800
+1/20: 5120
+1/4: 5094
+3/4: 4800
+9/10: 4800
+99/100: 4800
+
+COLLAPSE BY REPAY RATIO
+------------------------------------------------------------
+1/1: 1200
+1/10: 1280
+1/100: 1280
+1/2: 1200
+1/20: 1280
+1/4: 1273
+3/4: 1200
+9/10: 1200
+99/100: 1200
+
+NEUTRALIZATION BY RESET MODE
+------------------------------------------------------------
+
+TOP BOUNDARY / COLLAPSE SNAPSHOT
+------------------------------------------------------------
+
+TOP_BOUNDARY_HIT_1
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: withdraw_normalization
+net_external_position: -300000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500500000
+extraction_ratio_ppm: 3
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_2
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: withdraw_normalization
+net_external_position: -300000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500500000
+extraction_ratio_ppm: 3
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_3
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: withdraw_normalization
+net_external_position: -300000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500500000
+extraction_ratio_ppm: 3
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_4
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: withdraw_normalization
+net_external_position: -300000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500500000
+extraction_ratio_ppm: 3
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_5
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: none
+net_external_position: 49499900000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 494999
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_NET_EXTERNAL_POSITIVE;SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_6
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: none
+net_external_position: 49499900000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 494999
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_NET_EXTERNAL_POSITIVE;SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_7
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: none
+net_external_position: 49499900000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 494999
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_NET_EXTERNAL_POSITIVE;SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_8
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: none
+net_external_position: 49499900000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 300000
+extraction_ratio_ppm: 494999
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_NET_EXTERNAL_POSITIVE;SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_9
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: repay_normalization
+net_external_position: -100000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500300000
+extraction_ratio_ppm: 1
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+TOP_BOUNDARY_HIT_10
+input_value: 1000000
+borrow_ratio: 1/2
+repay_ratio: 1/100
+chain_window: 1000
+reentry_window: 100
+reset_mode: repay_normalization
+net_external_position: -100000
+residual_debt_value: 49500200000
+protocol_shortfall_model: 49500300000
+extraction_ratio_ppm: 1
+survived: True
+collapsed: False
+neutralized: False
+reason: SURVIVED_RESIDUAL_DEBT;SURVIVED_SHORTFALL_MODEL
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9J_logic_engine_boundary_collapse_summary.txt
+hits_file: phase9J_logic_engine_boundary_collapse_hits.csv

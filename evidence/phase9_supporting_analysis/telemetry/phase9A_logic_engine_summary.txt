@@ -1,0 +1,401 @@
+PHASE 9A — LOGIC ENGINE DELTA SWEEP SUMMARY
+============================================================
+
+started_at: 2026-05-15T08:29:27
+ended_at: 2026-05-15T08:29:28
+elapsed_seconds: 0.6048
+
+start_input: 1
+end_input: 250000
+total_sequences_tested: 250000
+total_anomalies_found: 250000
+
+ANOMALY COUNTS
+------------------------------------------------------------
+delta_nonzero_count: 250000
+phantom_debt_share_count: 249999
+phantom_debt_value_count: 249999
+final_output_less_than_input_count: 250000
+
+TOP HIT OVERVIEW
+------------------------------------------------------------
+
+TOP_HIT_1
+input_value: 2
+supplied_capital: 2
+shares_received: 1
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 1
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: -1
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_2
+input_value: 3
+supplied_capital: 3
+shares_received: 2
+borrowed_capital: 1
+debt_shares_minted: 1
+repaid_capital: 1
+debt_shares_burned: 0
+withdrawn_capital: 2
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 0
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_3
+input_value: 4
+supplied_capital: 4
+shares_received: 3
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 3
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 1
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_4
+input_value: 5
+supplied_capital: 5
+shares_received: 4
+borrowed_capital: 2
+debt_shares_minted: 2
+repaid_capital: 2
+debt_shares_burned: 1
+withdrawn_capital: 4
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 2
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_5
+input_value: 6
+supplied_capital: 6
+shares_received: 5
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 5
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 3
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_6
+input_value: 7
+supplied_capital: 7
+shares_received: 6
+borrowed_capital: 3
+debt_shares_minted: 3
+repaid_capital: 3
+debt_shares_burned: 2
+withdrawn_capital: 6
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 4
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_7
+input_value: 8
+supplied_capital: 8
+shares_received: 7
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 7
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 5
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_8
+input_value: 9
+supplied_capital: 9
+shares_received: 8
+borrowed_capital: 4
+debt_shares_minted: 4
+repaid_capital: 4
+debt_shares_burned: 3
+withdrawn_capital: 8
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 6
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_9
+input_value: 10
+supplied_capital: 10
+shares_received: 9
+borrowed_capital: 5
+debt_shares_minted: 5
+repaid_capital: 5
+debt_shares_burned: 4
+withdrawn_capital: 9
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 7
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_10
+input_value: 11
+supplied_capital: 11
+shares_received: 10
+borrowed_capital: 5
+debt_shares_minted: 5
+repaid_capital: 5
+debt_shares_burned: 4
+withdrawn_capital: 10
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 8
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_11
+input_value: 12
+supplied_capital: 12
+shares_received: 11
+borrowed_capital: 6
+debt_shares_minted: 6
+repaid_capital: 6
+debt_shares_burned: 5
+withdrawn_capital: 11
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 9
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_12
+input_value: 13
+supplied_capital: 13
+shares_received: 12
+borrowed_capital: 6
+debt_shares_minted: 6
+repaid_capital: 6
+debt_shares_burned: 5
+withdrawn_capital: 12
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 10
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_13
+input_value: 14
+supplied_capital: 14
+shares_received: 13
+borrowed_capital: 7
+debt_shares_minted: 7
+repaid_capital: 7
+debt_shares_burned: 6
+withdrawn_capital: 13
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 11
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_14
+input_value: 15
+supplied_capital: 15
+shares_received: 14
+borrowed_capital: 7
+debt_shares_minted: 7
+repaid_capital: 7
+debt_shares_burned: 6
+withdrawn_capital: 14
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 12
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_15
+input_value: 16
+supplied_capital: 16
+shares_received: 15
+borrowed_capital: 8
+debt_shares_minted: 8
+repaid_capital: 8
+debt_shares_burned: 7
+withdrawn_capital: 15
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 13
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_16
+input_value: 17
+supplied_capital: 17
+shares_received: 16
+borrowed_capital: 8
+debt_shares_minted: 8
+repaid_capital: 8
+debt_shares_burned: 7
+withdrawn_capital: 16
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 14
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_17
+input_value: 18
+supplied_capital: 18
+shares_received: 17
+borrowed_capital: 9
+debt_shares_minted: 9
+repaid_capital: 9
+debt_shares_burned: 8
+withdrawn_capital: 17
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 15
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_18
+input_value: 19
+supplied_capital: 19
+shares_received: 18
+borrowed_capital: 9
+debt_shares_minted: 9
+repaid_capital: 9
+debt_shares_burned: 8
+withdrawn_capital: 18
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 16
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_19
+input_value: 20
+supplied_capital: 20
+shares_received: 19
+borrowed_capital: 10
+debt_shares_minted: 10
+repaid_capital: 10
+debt_shares_burned: 9
+withdrawn_capital: 19
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 17
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_20
+input_value: 21
+supplied_capital: 21
+shares_received: 20
+borrowed_capital: 10
+debt_shares_minted: 10
+repaid_capital: 10
+debt_shares_burned: 9
+withdrawn_capital: 20
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 18
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_21
+input_value: 22
+supplied_capital: 22
+shares_received: 21
+borrowed_capital: 11
+debt_shares_minted: 11
+repaid_capital: 11
+debt_shares_burned: 10
+withdrawn_capital: 21
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 19
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_22
+input_value: 23
+supplied_capital: 23
+shares_received: 22
+borrowed_capital: 11
+debt_shares_minted: 11
+repaid_capital: 11
+debt_shares_burned: 10
+withdrawn_capital: 22
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 20
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_23
+input_value: 24
+supplied_capital: 24
+shares_received: 23
+borrowed_capital: 12
+debt_shares_minted: 12
+repaid_capital: 12
+debt_shares_burned: 11
+withdrawn_capital: 23
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 21
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_24
+input_value: 25
+supplied_capital: 25
+shares_received: 24
+borrowed_capital: 12
+debt_shares_minted: 12
+repaid_capital: 12
+debt_shares_burned: 11
+withdrawn_capital: 24
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 22
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+TOP_HIT_25
+input_value: 26
+supplied_capital: 26
+shares_received: 25
+borrowed_capital: 13
+debt_shares_minted: 13
+repaid_capital: 13
+debt_shares_burned: 12
+withdrawn_capital: 25
+phantom_debt_shares: 1
+phantom_debt_value: 2
+final_output: 23
+delta: -3
+reason: delta_nonzero;phantom_debt_shares;phantom_debt_value;final_output_less_than_input
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9A_logic_engine_summary.txt
+top_hits_file: phase9A_logic_engine_top_hits.csv

@@ -1,0 +1,292 @@
+PHASE 9F — LOGIC ENGINE SIGNATURE CONFIRMATION SUMMARY
+============================================================
+
+started_at: 2026-05-15T12:14:30
+ended_at: 2026-05-15T12:14:30
+elapsed_seconds: 0.0019
+
+RUN CONFIGURATION
+------------------------------------------------------------
+top_signatures_tested: 10
+offset_tests_per_signature: 8
+replay_cycle_windows: [1, 2, 5, 10, 25, 100, 1000, 10000]
+total_confirmation_rows: 640
+
+AGGREGATE CONFIRMATION RESULTS
+------------------------------------------------------------
+confirmed_delta_count: 640
+confirmed_phantom_count: 640
+confirmed_over_50_percent_count: 640
+confirmed_over_90_percent_count: 256
+strongest_abs_delta: 98010003
+strongest_loss_ratio_ppm: 980100
+strongest_accumulated_delta: 980100030000
+strongest_accumulated_phantom_value: 980100020000
+
+TOP CONFIRMED SIGNATURE SNAPSHOT
+------------------------------------------------------------
+
+TOP_CONFIRMED_1
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 1
+borrow_offset: 1
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_2
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 73
+borrow_offset: 183
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_3
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 191
+borrow_offset: 174
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_4
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 242
+borrow_offset: 374
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_5
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 411
+borrow_offset: 372
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_6
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 478
+borrow_offset: 397
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_7
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 10000
+liquidity_offset: 8191
+borrow_offset: 8191
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -980100030000
+accumulated_phantom_debt_shares: 980100010000
+accumulated_phantom_debt_value: 980100020000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_8
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 1000
+liquidity_offset: 1
+borrow_offset: 1
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -98010003000
+accumulated_phantom_debt_shares: 98010001000
+accumulated_phantom_debt_value: 98010002000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_9
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 1000
+liquidity_offset: 73
+borrow_offset: 183
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -98010003000
+accumulated_phantom_debt_shares: 98010001000
+accumulated_phantom_debt_value: 98010002000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+TOP_CONFIRMED_10
+signature_id: 1
+input_value: 100000000
+borrow_ratio: 99/100
+repay_ratio: 1/100
+replay_cycles: 1000
+liquidity_offset: 191
+borrow_offset: 174
+supplied_capital: 100000000
+shares_received: 99999999
+borrowed_capital: 99000000
+debt_shares_minted: 99000000
+repaid_capital: 990000
+debt_shares_burned: 989999
+withdrawn_capital: 99999999
+phantom_debt_shares: 98010001
+phantom_debt_value: 98010002
+final_output: 1989997
+delta: -98010003
+loss_ratio_ppm: 980100
+accumulated_delta: -98010003000
+accumulated_phantom_debt_shares: 98010001000
+accumulated_phantom_debt_value: 98010002000
+accumulated_loss_ratio_ppm: 980100
+confirmation_status: CONFIRMED_DELTA;CONFIRMED_PHANTOM_DEBT_SHARES;CONFIRMED_PHANTOM_DEBT_VALUE;CONFIRMED_MINTED_EXCEEDS_BURNED;CONFIRMED_OVER_50_PERCENT_LOSS_MODEL;CONFIRMED_OVER_90_PERCENT_LOSS_MODEL
+
+FILES GENERATED
+------------------------------------------------------------
+summary_file: phase9F_logic_engine_signature_confirmation_summary.txt
+hits_file: phase9F_logic_engine_signature_confirmation_hits.csv
