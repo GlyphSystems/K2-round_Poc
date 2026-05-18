@@ -1,0 +1,433 @@
+Phase 5 Summary — Pre-Failure Coherence and Cycle 10 Boundary Reproduction
+
+Objective
+
+Phase 5 was designed to validate the repayment failure boundary identified during Phase 4 and determine whether the observed Contract #35 / allowance-related failure was caused by gradual account corruption, pre-failure state drift, or a specific reproducible execution boundary.
+
+Phase 4 established that repeated patterned residual borrow/repay cycling could reach a repayment-path failure around Cycle 10. Phase 5 narrowed that finding by asking three core questions:
+
+1. Does accounting remain coherent before the failure occurs?
+2. Does stopping before the boundary leave the account usable?
+3. Does re-entering the same boundary reproduce the failure deterministically?
+
+This phase was not intended to prove final exploit impact. Its purpose was to separate pre-boundary accounting coherence from boundary-triggered repayment failure.
+
+Test Environment
+
+All Phase 5 tests were executed against the real K2/C4 protocol harness.
+
+Primary test file:
+
+tests/c4/src/lib.rs
+
+Primary command:
+
+cargo test --package k2-c4 -- --nocapture
+
+The tests used the same patterned borrow/repay sequence from Phase 4G and Phase 4H.
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Telemetry tracked:
+
+asset_a balance
+asset_b balance
+collateral
+debt
+health factor
+borrow amount
+repay amount
+pre-repay balance
+failure condition
+post-cycle account coherence
+
+Supporting runtime screenshots are stored in:
+
+screenshots/
+
+Supporting runtime telemetry and text outputs are stored in:
+
+telemetry/
+
+Phase 5A — Post-Revert Accounting Consistency Check
+
+Phase 5A tested whether the repayment/allowance failure boundary observed in Phase 4G and Phase 4H left account state inconsistent before the failure, or whether the account remained accounting-coherent up to the failure point.
+
+Test configuration:
+
+cycles = 10
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Initial state:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 10,000,000,000
+collateral: 5,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+Observed execution:
+
+The harness executed repeated patterned borrow/repay cycles. During successful completed cycles, the following pattern remained consistent:
+
+borrow created measurable debt
+repay returned total_debt_base to 0
+collateral remained stable
+health factor returned to max / infinite after each successful repay
+asset_b balance increased by the expected residual pattern
+
+This showed that the account did not show obvious corruption during the successful pre-failure cycles.
+
+Key successful state pattern after completed repay cycles:
+
+debt: 0
+collateral: 5,000,000,000,000,000,000
+health factor: max / infinite
+
+Visible residual balance progression:
+
+The asset_b balance increased over repeated cycles by the expected residual pattern. By the Cycle 10 failure window, asset_b balance had accumulated visible residual increments.
+
+Cycle 10 failure window:
+
+Before borrow:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 10,000,000,009
+collateral: 5,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+After borrow:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+
+Before repay:
+
+repay_amount: 1,000,000,000
+asset_b balance before repay: 11,000,000,010
+
+Failure condition:
+
+HostError: Error(Contract, #35)
+
+Diagnostic signal:
+
+contract call failed during repay path
+
+Prior related diagnostics from Phase 4G and Phase 4H included:
+
+not enough allowance to spend
+
+Interpretation:
+
+Phase 5A confirmed that the successful completed cycles remain internally coherent before the failure boundary is reached. Debt returns to zero after repayment, collateral does not drift, and health factor resets to max / infinite after successful repay cycles.
+
+This is important because it reduces the likelihood that the failure is caused by gradual visible account-state corruption before Cycle 10.
+
+Phase 5A did not prove post-revert corruption. Instead, it strengthened the reproducibility of the repayment failure boundary while showing pre-failure accounting coherence.
+
+Result:
+
+FAILED — useful reproducible boundary signal, but no confirmed exploit impact yet.
+
+Phase 5B — Pre-Failure Re-Entry Control Check
+
+Phase 5B tested whether the account remains operational and accounting-coherent when the patterned residual sequence is stopped before the known Cycle 10 failure boundary.
+
+This was a control test. The purpose was to determine whether the account becomes poisoned before Cycle 10 or whether the failure is specifically tied to crossing the Cycle 10 boundary.
+
+Test configuration:
+
+cycles = 9
+followup_supply = 1,000,000,000
+followup_borrow = 500,000,000
+followup_repay = 500,000,000
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Initial state:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 10,000,000,000
+collateral: 5,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+Observed execution:
+
+The test completed 9 patterned borrow/repay cycles successfully.
+
+Across completed cycles:
+
+borrow created measurable debt
+repay returned debt to zero
+collateral remained stable
+health factor returned to max / infinite after each repay
+residual balance movement remained visible and consistent
+no Contract #35 failure occurred before the known Cycle 10 boundary
+
+Pre-failure pressure result after Cycle 9:
+
+debt: 0
+health factor: max / infinite
+
+Follow-up supply result:
+
+Normal supply after pre-failure pressure completed successfully.
+
+Observed:
+
+asset_a balance: 4,000,000,000
+asset_b balance: 10,000,000,009
+collateral: 6,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+Follow-up borrow result:
+
+Normal borrow after pre-failure pressure completed successfully.
+
+Observed:
+
+asset_a balance: 4,000,000,000
+asset_b balance: 10,500,000,009
+collateral: 6,000,000,000,000,000,000
+debt: 500,000,000,000,000,000
+health factor: 10,200,000,000,000,000,000
+
+Follow-up repay result:
+
+Normal repay after pre-failure pressure completed successfully.
+
+Final account state:
+
+asset_a balance: 4,000,000,000
+asset_b balance: 10,000,000,009
+collateral: 6,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+Test result:
+
+ok
+1 passed
+0 failed
+
+Interpretation:
+
+Phase 5B showed that the account remains usable and accounting-coherent when the patterned sequence is stopped before the known failure boundary.
+
+This is a key control result.
+
+The account did not become poisoned after 9 cycles. Normal supply worked. Normal borrow worked. Normal repay worked. Final debt returned to zero. Health factor returned to max / infinite.
+
+This reduces the likelihood that the issue is caused by gradual hidden corruption during cycles 1–9. Instead, current evidence indicates that the failure is boundary-triggered during the later repayment path.
+
+Result:
+
+PASS — pre-failure re-entry remains coherent.
+
+Phase 5C — Boundary Re-Entry Failure Confirmation
+
+Phase 5C tested whether re-entering the known boundary condition reproduces the same repayment failure after patterned residual borrow/repay cycling.
+
+This test was designed to confirm that the Cycle 10 failure was not random, accidental, or caused by malformed execution.
+
+Test configuration:
+
+cycles = 10
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Observed behavior:
+
+Cycles 1–9 completed normally.
+
+After each completed repay:
+
+debt returned to 0
+collateral stayed stable at 5,000,000,000,000,000,000
+health factor returned to max / infinite state
+asset_b residual balance increased predictably
+
+Cycle 10 failure window:
+
+borrow_amount: 1,000,000,001
+repay_amount: 1,000,000,000
+
+After borrow / before repay:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+
+Immediately before repay:
+
+asset_b balance before repay: 11,000,000,010
+
+Failure condition:
+
+HostError: Error(Contract, #35)
+
+Diagnostic signal:
+
+contract call failed
+not enough allowance to spend
+
+Test result:
+
+FAILED
+0 passed
+1 failed
+
+Interpretation:
+
+Phase 5C successfully reproduced the known boundary failure.
+
+This is not a syntax error.
+This is not random behavior.
+This is not a broken paste.
+This is not a broken harness.
+
+The same patterned sequence again reached failure at Cycle 10 during repayment execution.
+
+The important finding is that the user visibly had asset_b balance before repay, but the repay operation still failed with Contract #35 / allowance-related diagnostics.
+
+This supports the current hypothesis that the failure is tied to allowance, transfer authorization, or repayment execution mechanics under repeated residual cycling, not simple token balance insufficiency.
+
+Result:
+
+FAILED — useful reproducible boundary confirmation.
+
+Consolidated Phase 5 Findings
+
+Phase 5 established three important conclusions.
+
+First, accounting remains coherent before the failure boundary. Phase 5A showed that completed cycles prior to the failure return debt to zero, preserve collateral, and restore health factor to max / infinite after successful repayment.
+
+Second, the account remains usable when stopped before the boundary. Phase 5B showed that after 9 patterned cycles, normal supply, borrow, and repay operations still work. This means the account is not obviously poisoned before the boundary.
+
+Third, re-entering the Cycle 10 boundary reproduces the repayment failure. Phase 5C confirmed that the same sequence again reaches Contract #35 / allowance-related failure during repayment execution.
+
+The combined result is that the failure appears boundary-specific rather than continuously corruptive.
+
+Red-Team Assessment
+
+Phase 5 should not be framed as final exploit proof.
+
+Phase 5 did not prove:
+
+direct value extraction
+collateral inflation
+debt disappearance
+reserve theft
+protocol insolvency
+post-revert state corruption
+cross-user impact
+health-factor bypass
+
+However, Phase 5 did prove:
+
+the repayment failure boundary is reproducible
+pre-boundary completed cycles remain accounting-coherent
+stopping before the boundary allows normal protocol operations
+re-entering the boundary reproduces failure
+the user can have visible asset_b balance before the failing repayment
+the failure appears tied to the Cycle 10 repayment path rather than general account poisoning
+
+This distinction matters because it keeps the report credible. The correct claim is not that Phase 5 proves catastrophic loss. The correct claim is that Phase 5 isolates and confirms a deterministic repayment execution boundary.
+
+Security Interpretation
+
+The strongest technical claim from Phase 5 is:
+
+Repeated patterned residual cycling reliably reaches a repayment failure boundary around Cycle 10, while completed pre-boundary cycles remain accounting-coherent and normal operations remain available when execution stops before the boundary.
+
+This is a meaningful protocol signal because repayment is a core lifecycle operation. A reproducible repayment failure after a specific patterned sequence may create downstream risk if later phases show trapped debt, inability to repay, liquidation exposure, collateral withdrawal under unresolved debt, or reserve/accounting mismatch.
+
+At the Phase 5 stage, those downstream impacts were not yet confirmed. Phase 5 served as the necessary boundary isolation layer before impact testing.
+
+Relationship to Later Phases
+
+Phase 5 created the bridge between Phase 4 discovery and later impact validation.
+
+Phase 4 identified the repayment failure signal.
+
+Phase 5 confirmed that:
+
+the signal is reproducible
+the boundary is specific
+the account is coherent before the boundary
+pre-boundary re-entry works
+boundary re-entry fails again
+
+This justified moving into later testing focused on:
+
+post-failure recovery
+persistent repayment failure
+collateral behavior after failure
+rollback integrity
+fragmented repayment behavior
+low-health-factor enforcement
+stale-state analysis
+liquidation-adjacent impact
+
+Conclusion
+
+Phase 5 successfully converted the Phase 4 repayment failure signal into a controlled boundary-confirmation result.
+
+The tests showed that completed cycles before the failure remain coherent, and that stopping before the known boundary leaves the account usable for normal supply, borrow, and repay operations. However, re-entering the patterned sequence through Cycle 10 reproduced the repayment-path failure with Contract #35 / allowance-related diagnostics.
+
+The strongest Phase 5 conclusion is:
+
+The observed repayment failure is not caused by continuous pre-boundary account corruption. It appears to be a deterministic Cycle 10 repayment boundary triggered by repeated patterned residual borrow/repay cycling.
+
+Phase 5 does not establish P1 impact by itself. It provides the credibility foundation required for later impact testing by proving that the failure is reproducible, boundary-specific, and not explained by general account poisoning before the boundary.
