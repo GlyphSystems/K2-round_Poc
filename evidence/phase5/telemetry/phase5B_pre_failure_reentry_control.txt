@@ -1,0 +1,176 @@
+// ---------- PHASE 5B: Pre-Failure Re-Entry Control Check ----------
+
+println!("--- PHASE 5B: PRE-FAILURE RE-ENTRY CONTROL CHECK ---");
+
+let cycles: u32 = 9;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let followup_supply: u128 = 1_000_000_000;
+let followup_borrow: u128 = 500_000_000;
+let followup_repay: u128 = 500_000_000;
+
+println!("cycles: {:?}", cycles);
+println!("borrow_pattern: {:?}", borrow_pattern);
+println!("repay_pattern: {:?}", repay_pattern);
+println!("followup_supply: {:?}", followup_supply);
+println!("followup_borrow: {:?}", followup_borrow);
+println!("followup_repay: {:?}", followup_repay);
+
+println!("--- INITIAL ACCOUNT STATE ---");
+let initial = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+// ----------------------------------------------------
+// STEP 1 — Run patterned cycles up to pre-failure boundary
+// ----------------------------------------------------
+
+println!("--- STEP 1: PRE-FAILURE PATTERNED CYCLES ---");
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("====================================================");
+    println!("--- PHASE 5B CYCLE {:?} ---", i + 1);
+    println!("borrow_amount: {:?}", borrow_amount);
+    println!("repay_amount: {:?}", repay_amount);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    let after_borrow = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER BORROW ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_borrow.total_collateral_base);
+    println!("debt: {:?}", after_borrow.total_debt_base);
+    println!("health factor: {:?}", after_borrow.health_factor);
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER REPAY ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_repay.total_collateral_base);
+    println!("debt: {:?}", after_repay.total_debt_base);
+    println!("health factor: {:?}", after_repay.health_factor);
+
+    assert_eq!(
+        after_repay.total_debt_base,
+        0,
+        "debt should normalize before the known failure boundary"
+    );
+}
+
+// ----------------------------------------------------
+// STEP 2 — Normal operation after pre-failure pressure
+// ----------------------------------------------------
+
+println!("--- STEP 2: NORMAL SUPPLY AFTER PRE-FAILURE PRESSURE ---");
+
+setup.router.supply(
+    &setup.user,
+    &setup.asset_a,
+    &followup_supply,
+    &setup.user,
+    &0u32,
+);
+
+let after_supply = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_supply.total_collateral_base);
+println!("debt: {:?}", after_supply.total_debt_base);
+println!("health factor: {:?}", after_supply.health_factor);
+
+assert_eq!(
+    after_supply.total_debt_base,
+    0,
+    "normal supply should not revive debt after pre-failure pressure"
+);
+
+// ----------------------------------------------------
+// STEP 3 — Normal borrow and repay after pressure
+// ----------------------------------------------------
+
+println!("--- STEP 3: NORMAL BORROW AFTER PRE-FAILURE PRESSURE ---");
+
+setup.router.borrow(
+    &setup.user,
+    &setup.asset_b,
+    &followup_borrow,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+let after_followup_borrow = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_followup_borrow.total_collateral_base);
+println!("debt: {:?}", after_followup_borrow.total_debt_base);
+println!("health factor: {:?}", after_followup_borrow.health_factor);
+
+assert!(
+    after_followup_borrow.total_debt_base > 0,
+    "normal follow-up borrow should create measurable debt"
+);
+
+println!("--- STEP 4: NORMAL REPAY AFTER PRE-FAILURE PRESSURE ---");
+
+setup.router.repay(
+    &setup.user,
+    &setup.asset_b,
+    &followup_repay,
+    &1u32,
+    &setup.user,
+);
+
+let final_account = setup.router.get_user_account_data(&setup.user);
+
+println!("--- PHASE 5B FINAL ACCOUNT STATE ---");
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("final collateral: {:?}", final_account.total_collateral_base);
+println!("final debt: {:?}", final_account.total_debt_base);
+println!("final health factor: {:?}", final_account.health_factor);
+
+assert_eq!(
+    final_account.total_debt_base,
+    0,
+    "normal follow-up repay should return account debt to zero"
+);

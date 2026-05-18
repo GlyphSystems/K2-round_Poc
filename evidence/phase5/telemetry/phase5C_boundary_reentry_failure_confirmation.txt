@@ -1,0 +1,83 @@
+// ---------- PHASE 5C: Boundary Re-Entry Failure Confirmation ----------
+
+println!("--- PHASE 5C: BOUNDARY RE-ENTRY FAILURE CONFIRMATION ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+println!("cycles: {:?}", cycles);
+println!("borrow_pattern: {:?}", borrow_pattern);
+println!("repay_pattern: {:?}", repay_pattern);
+
+println!("--- INITIAL ACCOUNT STATE ---");
+let initial = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("====================================================");
+    println!("--- PHASE 5C CYCLE {:?} ---", i + 1);
+    println!("borrow_amount: {:?}", borrow_amount);
+    println!("repay_amount: {:?}", repay_amount);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    let after_borrow = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER BORROW / BEFORE REPAY ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_borrow.total_collateral_base);
+    println!("debt: {:?}", after_borrow.total_debt_base);
+    println!("health factor: {:?}", after_borrow.health_factor);
+
+    println!("--- REPAY ATTEMPT ---");
+    println!("repay_amount: {:?}", repay_amount);
+    println!(
+        "asset_b balance before repay: {:?}",
+        setup.asset_b_token.balance(&setup.user)
+    );
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER REPAY ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_repay.total_collateral_base);
+    println!("debt: {:?}", after_repay.total_debt_base);
+    println!("health factor: {:?}", after_repay.health_factor);
+}
