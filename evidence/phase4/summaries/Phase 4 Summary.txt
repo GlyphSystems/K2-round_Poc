@@ -1,0 +1,436 @@
+Phase 4 Summary — Residual Debt Boundary and Repayment Failure Signal
+
+Objective
+
+Phase 4 was designed to test whether small borrow/repay residual differences create measurable debt persistence, hidden accounting drift, or repeatable operational instability inside the real K2/C4 protocol test harness.
+
+This phase followed the validated lifecycle path established in the prior harness setup:
+
+supply → borrow → repay → withdraw / follow-up operations
+
+The purpose of Phase 4 was not to claim immediate exploitability. The purpose was to characterize the repayment boundary behavior, determine whether apparent residual dust survives accounting, and identify whether repeated residual patterns create a reproducible protocol-level signal.
+
+Test Environment
+
+All Phase 4 tests were executed against the real K2/C4 test harness located at:
+
+tests/c4/src/lib.rs
+
+The command used throughout this phase was:
+
+cargo test --package k2-c4 -- --nocapture
+
+The tests used direct protocol interaction through the existing harness rather than standalone arithmetic proofs. Telemetry was captured for account balances, collateral, debt, health factor, repayment behavior, and failure conditions.
+
+Supporting runtime screenshots are stored in:
+
+screenshots/
+
+Supporting runtime telemetry and text outputs are stored in:
+
+telemetry/
+
+Phase 4A — Partial Repay / Residual Debt Check
+
+Phase 4A tested whether borrowing 1 unit more than the repayment amount leaves measurable residual debt.
+
+Test values:
+
+borrow_amount = 1,000,000,001
+repay_amount = 1,000,000,000
+
+The expected human-level residual was 1 unit.
+
+The test assumption was that a 1-unit principal-level gap should leave nonzero debt after repayment. The assertion expected:
+
+after_repay.total_debt_base > 0
+
+Observed result:
+
+after_repay.total_debt_base = 0
+
+This caused the assertion to fail, but the failure produced important telemetry. The protocol cleared the debt to zero even though the borrow amount exceeded the repayment amount by 1 unit.
+
+Observed before borrow:
+
+asset_a balance: 5,000,000,000
+asset_b balance: 10,000,000,000
+collateral: 5,000,000,000,000,000,000
+debt: 0
+health factor: max / infinite
+
+Observed after borrow:
+
+asset_b balance: 11,000,000,001
+debt: 1,000,000,001,000,000,000
+health factor reduced
+
+Observed after partial repay:
+
+asset_b balance: 10,000,000,001
+debt: 0
+health factor restored to max / infinite
+
+Interpretation:
+
+A 1-unit repayment gap did not survive into total_debt_base. The protocol normalized, rounded, forgave, or otherwise collapsed this residual at the debt-accounting level.
+
+Phase 4A did not prove exploitability. It identified a precision boundary in the borrow → repay path.
+
+Phase 4B — Larger Residual Boundary Check
+
+Phase 4B tested whether a slightly larger residual survives protocol accounting.
+
+Test values:
+
+borrow_amount = 1,000,000,001
+repay_amount = 999,999,999
+
+Expected principal-level gap:
+
+2 units
+
+Observed result:
+
+debt after partial repay: 2,000,000,000
+
+The test passed.
+
+Interpretation:
+
+Phase 4B established a meaningful boundary:
+
+1-unit gap: cleared / normalized away
+2-unit gap: survives as measurable debt
+
+This confirmed that the repayment path has a real precision boundary. A 1-unit residual is treated differently from a 2-unit residual. This finding was important because it separated harmless micro-dust behavior from measurable debt persistence.
+
+Phase 4B did not prove exploitability, but it confirmed that the accounting boundary is real and reproducible.
+
+Phase 4C — Residual Accumulation Cycle Check
+
+Phase 4C tested whether repeated 1-unit residual repayment gaps accumulate over multiple borrow/repay cycles.
+
+Test configuration:
+
+cycles = 10
+borrow amount per cycle = 1,000,000,001
+repay amount per cycle = 1,000,000,000
+nominal expected residual per cycle = 1 unit
+
+The test repeatedly borrowed slightly above the repayment amount, repaid slightly below the borrowed amount, and checked whether residual debt accumulated over time.
+
+Observed behavior:
+
+Each cycle temporarily created borrow-state debt.
+Each partial repay normalized debt back to zero.
+No residual debt accumulation occurred across the 10 tested cycles.
+Health factor remained stable throughout the sequence.
+Final debt returned to zero.
+
+Expected accumulated nominal gap:
+
+10 units
+
+Observed accumulated residual debt:
+
+0
+
+Interpretation:
+
+The 1-unit residual normalization remained stable under repeated cycling. No exploitable accumulation was observed in this tested range.
+
+This was a useful negative-control result. It eliminated one possible false-positive theory: that repeated 1-unit residual gaps accumulate hidden debt over time.
+
+Phase 4D — Cross-Operation Dust Persistence Check
+
+Phase 4D tested whether the 1-unit residual boundary remains normalized after crossing into additional protocol operations.
+
+Test sequence:
+
+1. Primary borrow using the 1-unit residual boundary
+2. Partial repay normalization
+3. Withdraw after normalization
+4. Secondary borrow after normalization
+
+Test values:
+
+borrow_amount = 1,000,000,001
+repay_amount = 1,000,000,000
+
+Observed behavior:
+
+The primary borrow created debt as expected.
+The partial repay normalized debt fully to zero.
+The 1-unit arithmetic gap did not persist.
+Withdraw after normalization reduced collateral correctly.
+Debt remained zero after withdrawal.
+A secondary borrow created measurable debt normally.
+No hidden residual debt reappeared after the withdraw or secondary borrow operation.
+
+Interpretation:
+
+Cross-operation state transitions did not preserve hidden residual debt from the 1-unit gap. Normalization remained deterministic across borrow, repay, withdraw, and secondary borrow behavior.
+
+Phase 4D did not validate an exploit condition. It strengthened the investigation by eliminating another false-positive path: hidden residual debt reappearing after later protocol operations.
+
+Phase 4E — State Saturation / Boundary Pressure Check
+
+Phase 4E stress-tested repeated micro-boundary normalization under sustained operational pressure.
+
+Test configuration:
+
+cycles = 25
+borrow_amount = 1,000,000,001
+repay_amount = 1,000,000,000
+checkpoint_interval = 5
+
+Purpose:
+
+Determine whether repeated borrow/repay normalization cycles accumulate hidden accounting drift, destabilize internal state, produce residual debt leakage, or trigger operational degradation under sustained pressure.
+
+Observed behavior through early checkpoints:
+
+At cycle 5:
+
+debt remained normalized to zero
+balances remained coherent
+health factor remained stable
+no measurable residual dust persisted
+
+At cycle 10:
+
+debt remained normalized to zero
+collateral remained coherent
+health factor remained stable
+normalization behavior continued deterministically
+
+Failure condition:
+
+During continued saturation execution, the test terminated with:
+
+HostError: Error(Contract, #35)
+
+Telemetry indicated:
+
+not enough allowance to spend
+
+Interpretation:
+
+Phase 4E did not show persistent debt desynchronization or direct accounting corruption. However, it introduced the first major operational failure signal in this phase.
+
+The important distinction is that this was not a syntax failure, not a harness construction failure, and not a simple failed arithmetic assertion. The failure emerged during sustained protocol execution under repeated residual-boundary cycling.
+
+Phase 4E suggested that repeated normalization pressure may reach an allowance or transfer-execution boundary under sustained cycling.
+
+Phase 4F — Same-User Post-Saturation Follow-Up Check
+
+Phase 4F tested whether same-user residual saturation causes hidden debt or state corruption that later reappears during normal operations.
+
+Test configuration:
+
+saturation_cycles = 10
+saturation_borrow = 1,000,000,001
+saturation_repay = 1,000,000,000
+followup_supply = 2,000,000,000
+followup_borrow = 500,000,000
+
+Observed saturation behavior:
+
+Cycles 1–10 all returned debt to zero.
+Collateral remained stable.
+Health factor returned to max / infinite state.
+
+Observed follow-up supply:
+
+asset_a balance decreased as expected
+collateral increased from 5.0e18 to 7.0e18
+debt remained zero
+health factor remained max / infinite
+
+Observed follow-up borrow:
+
+asset_b balance increased as expected
+debt increased to 500,000,000,000,000,000
+health factor recalculated coherently
+
+Interpretation:
+
+Same-user saturation did not corrupt account state. The normalized 1-unit residual did not reappear after follow-up supply. The follow-up borrow created measurable debt correctly, and the health factor recalculated as expected.
+
+Phase 4F eliminated same-user post-saturation hidden debt revival as a likely exploit path.
+
+Phase 4G — Index / Rounding Drift Amplification Check
+
+Phase 4G tested whether patterned residual borrow/repay values cause index-level or rounding-drift amplification across repeated state mutations.
+
+Test configuration:
+
+cycles = 30
+
+borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Observed behavior:
+
+Cycles progressed normally through early patterned mutations.
+After each visible completed repay, debt returned to zero.
+Health factor returned to max / infinite state.
+asset_b balance increased by the expected residual pattern amount.
+
+Visible residual pattern:
+
+Cycle 1 residual: +1
+Cycle 2 residual: +2
+Cycle 3 residual: +3
+Cycle 4 residual: +4
+Cycle 5 residual: +5
+Cycle 6 residual: +6
+Cycle 7 residual: +7
+Cycle 8 residual: +8
+Cycle 9 residual: +9
+
+At Cycle 10:
+
+borrow_amount = 1,000,000,001
+repay_amount = 1,000,000,000
+
+Borrow entered successfully. Failure occurred during or around the subsequent repayment execution.
+
+Failure condition:
+
+HostError: Error(Contract, #35)
+
+Diagnostic signal:
+
+not enough allowance to spend
+
+Interpretation:
+
+Phase 4G reproduced the same failure class first observed in Phase 4E. The failure occurred under patterned residual cycling rather than constant repetition.
+
+This did not prove direct value extraction, but it showed that repeated patterned residual cycling can reach an operational repayment boundary before the full planned cycle count completes.
+
+The signal became more meaningful because the same Contract #35 / allowance-related failure class appeared under both saturation pressure and patterned residual drift pressure.
+
+Phase 4H — Allowance Failure Boundary Confirmation
+
+Phase 4H narrowed the Phase 4G behavior by reducing the cycle count and measuring where the Contract #35 failure begins.
+
+Test configuration:
+
+cycles = 12
+
+borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Observed result:
+
+Cycles 1–9 completed successfully.
+After each visible repay, debt returned to zero.
+Health factor returned to max / infinite state.
+asset_b balance continued increasing by the residual pattern amount.
+
+Cycle 10 failure window:
+
+Before borrow:
+
+asset_b balance: 10,000,000,009
+debt: 0
+
+After borrow / before repay:
+
+asset_b balance: 11,000,000,010
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+
+Immediately before repay:
+
+asset_b balance: 11,000,000,010
+repay_attempt_amount: 1,000,000,000
+
+Failure condition:
+
+HostError: Error(Contract, #35)
+
+Diagnostic signal:
+
+not enough allowance to spend
+
+Interpretation:
+
+Phase 4H confirmed that the failure was reproducible near the Cycle 10 repayment boundary under patterned residual cycling.
+
+The important observation is that the user had visible asset_b balance before repayment, but the contract still failed with an allowance-related transfer error.
+
+This suggested that the failure was not simple token balance insufficiency. It appeared connected to allowance, transfer authorization, or repayment execution mechanics under repeated patterned borrow/repay pressure.
+
+Consolidated Phase 4 Findings
+
+Phase 4 established several important findings.
+
+First, the protocol has a measurable residual boundary in the borrow → repay path. A 1-unit residual is normalized to zero, while a 2-unit residual survives as measurable debt.
+
+Second, repeated 1-unit residual gaps did not accumulate hidden debt during the tested simple-cycle and cross-operation paths. This reduced false-positive risk and showed that the protocol handles simple micro-dust normalization coherently.
+
+Third, under sustained repeated pressure and patterned residual cycling, the test sequence consistently reached a Contract #35 repayment failure class. The failure appeared around the Cycle 10 boundary in the patterned tests.
+
+Fourth, the failure appeared during repayment execution after prior cycles had completed coherently. Debt returned to zero during successful cycles, health factor returned to max / infinite state, and collateral remained stable before the failure boundary.
+
+Fifth, the Cycle 10 failure window showed visible asset_b balance before repayment, but the repayment still failed with an allowance-related diagnostic. This made the signal worth carrying forward into Phase 5 for deeper boundary and post-failure analysis.
+
+Red-Team Assessment
+
+Phase 4 should not be framed as proof of a P1 exploit by itself.
+
+Phase 4 did not prove:
+
+direct value extraction
+reserve theft
+protocol insolvency
+collateral inflation
+health-factor bypass
+post-failure state corruption
+cross-user impact
+
+However, Phase 4 did prove several useful and reproducible technical signals:
+
+a real 1-unit vs 2-unit repayment residual boundary
+deterministic micro-dust normalization under simple cycles
+no hidden accumulation in the basic 1-unit residual path
+a repeated Contract #35 repayment failure under sustained/patterned cycling
+reproducibility of the failure near Cycle 10
+visible user token balance before repayment failure
+a failure class worth escalating into post-boundary analysis
+
+Conclusion
+
+Phase 4 transitioned the investigation from basic lifecycle validation into repayment-boundary characterization.
+
+The early tests showed that simple 1-unit residual gaps are normalized and do not accumulate into hidden debt under basic repeated or cross-operation paths. That reduced false-positive risk and improved confidence in the test process.
+
+The later tests identified a more important operational signal: sustained and patterned residual borrow/repay cycling can reproducibly reach a repayment execution failure around the Cycle 10 boundary, returning Contract #35 / allowance-related diagnostics even when visible asset_b balance is present before repayment.
+
+The strongest Phase 4 conclusion is:
+
+Repeated patterned residual cycling can reach a reproducible repayment-path failure boundary, while completed pre-boundary cycles remain accounting-coherent.
+
+Phase 4 does not establish exploit impact by itself. It establishes the repayment-boundary signal that justified Phase 5 post-failure consistency testing and later impact analysis.
