@@ -1,0 +1,902 @@
+Phase 7 Summary — Post-Failure Collateral Exit, Repayment Asymmetry, and Rollback Integrity
+
+Objective
+
+Phase 7 was designed to determine whether the persistent repayment failure identified in Phase 6 creates meaningful post-failure impact during continued protocol interaction.
+
+Earlier phases established that repeated patterned residual borrow/repay cycling can deterministically trigger a Cycle 10 repayment failure, producing UnderlyingTransferFailed while visible asset_b balance remains present. Phase 6 further showed that the failure can persist after retry attempts and that the account remains callable after the repayment boundary is reached.
+
+Phase 7 moved from persistence validation into impact-path testing.
+
+The primary questions were:
+
+1. Can collateral still be withdrawn after the repayment path enters the failure state?
+2. Does debt remain active while collateral exits?
+3. Does the protocol enforce health-factor limits during post-failure withdrawals?
+4. Does repayment behavior become amount-sensitive after the boundary?
+5. Can fragmented repayments reduce debt when larger repayments fail?
+6. Do failed repay, borrow, and withdraw operations mutate state unexpectedly?
+7. Does repeated failed execution create hidden accounting drift?
+8. Does low-health-factor enforcement remain intact after the repayment boundary?
+9. Does stale state propagate across mixed operation sequences?
+
+The purpose of Phase 7 was to determine whether the repayment failure remains isolated to repayment execution, or whether it creates a broader protocol-state risk involving collateral exit, recovery behavior, withdrawal limits, failed-operation rollback, or liquidation-adjacent exposure.
+
+Test Environment
+
+All Phase 7 tests were executed against the real K2/C4 protocol harness.
+
+Primary test file:
+
+tests/c4/src/lib.rs
+
+Primary command:
+
+cargo test --package k2-c4 -- --nocapture
+
+The tests continued using the known patterned borrow/repay sequence that reliably reproduces the Cycle 10 repayment boundary.
+
+Known boundary result:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+Supporting runtime screenshots are stored in:
+
+screenshots/
+
+Supporting runtime telemetry and text outputs are stored in:
+
+telemetry/
+
+Phase 7A — Collateral Exit Under Active Debt
+
+Phase 7A tested whether collateral can still be withdrawn after the known repayment failure leaves active debt on the account.
+
+Starting post-failure state:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Withdraw attempt 1:
+
+withdraw_result_1: Ok(Ok(500000000))
+collateral after withdraw 1: 4,500,000,000,000,000,000
+debt after withdraw 1: 1,000,000,100,000,000,000
+health factor after withdraw 1: 3,824,999,996,175,000,003
+
+Withdraw attempt 2:
+
+withdraw_result_2: Ok(Ok(500000000))
+collateral after withdraw 2: 4,000,000,000,000,000,000
+debt after withdraw 2: 1,000,000,100,000,000,000
+health factor after withdraw 2: 3,399,999,996,600,000,003
+
+Withdraw attempt 3:
+
+withdraw_result_3: Ok(Ok(500000000))
+collateral after withdraw 3: 3,500,000,000,000,000,000
+debt after withdraw 3: 1,000,000,100,000,000,000
+health factor after withdraw 3: 2,974,999,997,025,000,002
+
+Repay check after collateral exit:
+
+repay_after_exit_result: Err(Ok(UnderlyingTransferFailed))
+
+Final telemetry:
+
+final collateral: 3,500,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 2,974,999,997,025,000,002
+final asset_a balance: 6,500,000,000
+final asset_b balance: 11,000,000,010
+collateral delta from failure state: 1,500,000,000,000,000,000
+debt delta from failure state: 0
+
+Interpretation:
+
+Phase 7A established the first meaningful post-failure impact path.
+
+After the repayment boundary failure, the account was still able to withdraw collateral while debt remained active and unchanged. The repayment path remained unavailable after the collateral exit sequence.
+
+The key issue is not only that repayment fails. The stronger issue is that collateral exit remains available while larger repayment remains blocked and debt persists.
+
+This creates a post-failure recovery asymmetry:
+
+repayment fails
+debt remains active
+collateral can still be reduced
+health factor degrades
+repayment remains unavailable afterward
+
+Result:
+
+Collateral exit under active unresolved debt confirmed.
+
+Phase 7B — Repeated Collateral Exit Pressure
+
+Phase 7B tested whether repeated collateral withdrawals remain possible after the repayment boundary failure.
+
+Starting post-failure state:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Withdrawal pressure:
+
+Eight post-failure withdrawals were attempted.
+
+Each withdrawal returned:
+
+withdraw_result: Ok(Ok(250000000))
+
+Micro repay probes after withdrawals returned:
+
+Ok(Ok(1))
+
+Final larger repay validation returned:
+
+final_repay_result: Err(Ok(UnderlyingTransferFailed))
+
+Final telemetry:
+
+final collateral: 3,000,000,000,000,000,000
+final debt: 999,999,993,000,000,000
+final health factor: 2,550,000,017,850,000,124
+final asset_a balance: 7,000,000,000
+final asset_b balance: 11,000,000,002
+collateral removed from failure state: 2,000,000,000,000,000,000
+debt delta from failure state: approximately 0
+
+Interpretation:
+
+Phase 7B strengthened Phase 7A by showing repeated collateral exit remained available after the repayment boundary.
+
+Collateral decreased materially from 5.0e18 to 3.0e18 while active debt remained present. The final larger repayment still failed with UnderlyingTransferFailed.
+
+This test also introduced an important nuance: micro repayment probes succeeded while the larger repayment path remained unavailable. That means the repayment subsystem was not fully locked. Instead, repayment behavior appeared amount-sensitive.
+
+Result:
+
+Repeated post-failure collateral exit confirmed; larger repayment remained unavailable.
+
+Phase 7C — Withdrawal Limit Enforcement Probe
+
+Phase 7C tested how far collateral withdrawal could continue after the repayment failure boundary while active debt remained on the account.
+
+Starting post-failure state:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Withdrawal results:
+
+Withdraw attempts 1–15 succeeded.
+
+Each successful withdrawal returned:
+
+withdraw_result: Ok(Ok(250000000))
+
+Withdraw attempt 16 failed with:
+
+withdraw_result: Err(Ok(HealthFactorTooLow))
+
+Final telemetry:
+
+final collateral: 1,250,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 1,062,499,998,937,500,001
+final asset_a balance: 8,750,000,000
+final asset_b balance: 11,000,000,010
+collateral removed from failure state: 3,750,000,000,000,000,000
+
+Final repay check:
+
+repay_after_limit_result: Err(Ok(UnderlyingTransferFailed))
+
+Interpretation:
+
+Phase 7C materially clarified the impact boundary.
+
+The protocol did enforce a health-factor limit. This is important. The test did not show a full health-factor bypass or unlimited collateral drain.
+
+However, the account was able to remove substantial collateral after the repayment path had already entered the failure state. Collateral decreased from 5.0e18 to 1.25e18 while debt remained active and larger repayment remained blocked.
+
+The correct technical finding is narrow but significant:
+
+A deterministic repayment failure can leave active debt in place while allowing substantial collateral withdrawal until normal health-factor limits are reached, after which larger repayment remains blocked.
+
+Result:
+
+Health-factor enforcement confirmed, but substantial post-failure collateral withdrawal remains possible before enforcement stops further exit.
+
+Phase 7D — Repay Amount Boundary Sweep
+
+Phase 7D tested whether repayment behavior after the Cycle 10 boundary failure depends on repayment amount size.
+
+Starting post-failure state:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,010,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Repay amounts tested:
+
+1
+10
+100
+1,000
+10,000
+100,000
+1,000,000
+10,000,000
+100,000,000
+1,000,000,000
+
+Observed pattern:
+
+Smaller repayment amounts succeeded and reduced debt incrementally.
+
+Successful repayment examples included:
+
+1
+10
+100
+1,000
+10,000
+100,000
+1,000,000
+10,000,000
+100,000,000
+
+The largest repayment amount failed:
+
+repay amount: 1,000,000,000
+result: Err(Ok(UnderlyingTransferFailed))
+
+Final telemetry:
+
+final collateral: 5,000,000,000,000,000,000
+final debt: 888,888,890,000,000,000
+final health factor: 4,781,249,994,023,437,507
+final asset_a balance: 5,000,000,000
+final asset_b balance: 10,888,888,899
+total debt reduction from start: 111,111,110,000,000,000
+collateral delta from start: 0
+
+Interpretation:
+
+Phase 7D narrowed the repayment failure behavior.
+
+The repayment subsystem is not completely broken after the boundary. Small and medium repayments can reduce debt. However, the larger repayment amount still fails with UnderlyingTransferFailed.
+
+This weakens any claim that the account is fully unable to repay. At the same time, it strengthens the precision of the finding: the issue appears to be an amount-sensitive repayment boundary after repeated patterned borrow/repay cycling.
+
+Potential impact areas include:
+
+users may be unable to repay expected larger amounts after reaching the boundary condition
+repayment may require fragmented smaller payments to proceed
+normal repayment UX or liquidation-prevention behavior may fail at larger repayment sizes
+small and large repayment paths may behave differently after boundary pressure
+
+Result:
+
+Amount-sensitive repayment behavior confirmed.
+
+Phase 7E — Fragmented Repay Debt Clearance Probe
+
+Phase 7E tested whether fragmented repayment can reduce debt after the large repayment path fails.
+
+Test structure:
+
+The known repayment failure boundary was reproduced.
+A large repayment control attempt failed.
+Fragmented repayment was then initiated using smaller repayment units.
+Debt reduction, asset_b consumption, health-factor improvement, and final large repayment retry were tracked.
+
+Large repayment control:
+
+final_large_repay_result: Err(Ok(UnderlyingTransferFailed))
+
+Fragmented repayment behavior:
+
+Multiple fragmented repayment attempts executed successfully.
+Debt reduced progressively.
+asset_b decreased as repayment fragments executed.
+Health factor improved during debt reduction.
+Collateral remained stable during fragmented repayment.
+Fragmented repayments eventually stalled near a residual debt boundary.
+Final large repayment retry continued failing.
+
+Initial telemetry:
+
+collateral: 500,000,000,000,000,000,000
+debt: 100,000,001,000,000,000,000
+health factor: 42,499,999,575,000,004,249
+asset_a balance: 500,000,000
+asset_b balance: 1,100,000,010
+
+Observed fragmented repayment progression:
+
+debt reduced from approximately 100,000,001,000,000,000,000 toward the 10,000,001,000,000,000,000 range.
+
+Health factor improved progressively through the fragmented repayment sequence.
+
+Final large repayment retry:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Interpretation:
+
+Phase 7E confirmed repayment-path asymmetry.
+
+Large repayment failed. Fragmented repayments succeeded. Debt reduced through smaller sequential repayments. Collateral remained stable. Health factor improved. However, the large repayment path continued failing even after partial debt recovery.
+
+This is important because it shows the transfer failure state persists independently from successful smaller repayments.
+
+The finding is not that repayment is impossible. The finding is that recovery behavior is inconsistent across repayment sizes.
+
+Result:
+
+Fragmented repayment path divergence confirmed.
+
+Phase 7F — Reserve Balance Delta Consistency Validation
+
+Phase 7F tested whether fragmented repayment preserves internal accounting consistency after repeated boundary-state repayment failures.
+
+The test focused on:
+
+reserve balance synchronization
+debt reduction tracking
+asset expenditure accounting
+post-failure repayment continuity
+fragmented repayment consistency
+
+Execution summary:
+
+The test executed 10 borrow/repay cycles using alternating repayment patterns.
+Cycles 1–9 completed normally.
+At Cycle 10, repayment transitioned into the known boundary failure:
+
+repay failure: Err(Ok(UnderlyingTransferFailed))
+
+Control large repayment attempt:
+
+control large repay result: Err(Ok(UnderlyingTransferFailed))
+
+Post-control telemetry showed:
+
+collateral unchanged
+debt unchanged
+health factor unchanged
+asset balances unchanged
+
+Fragmented repayment validation:
+
+After the control failure, smaller repayment fragments were executed.
+
+Fragments 1–9 reduced debt deterministically.
+asset_b expenditure matched repayment fragments.
+Health factor improved proportionally.
+Collateral remained unchanged.
+Reserve accounting remained synchronized.
+
+At Fragment 10:
+
+fragment_repay_result: Err(Ok(UnderlyingTransferFailed))
+
+No evidence was observed of:
+
+phantom collateral creation
+negative reserve drift
+silent balance mutation
+health-factor corruption
+duplicate repayment crediting
+repayment amplification
+
+Interpretation:
+
+Phase 7F is a key credibility test because it prevents overstatement.
+
+The protocol correctly rejected oversized repayment execution after entering the boundary condition. Fragmented repayments remained internally consistent and did not create observable debt desynchronization under tested parameters.
+
+This means the issue should not be framed as reserve desynchronization based on Phase 7F. The stronger and more accurate framing is:
+
+The large repayment boundary persists, while fragmented repayment remains accounting-consistent.
+
+Result:
+
+No reserve desynchronization observed; boundary-state repayment failure reproduced consistently.
+
+Phase 7G — Failed Operation Rollback Invariant Probe
+
+Phase 7G tested whether failed operations mutate account state after the known repayment boundary.
+
+This test specifically checked rollback behavior for:
+
+failed large repay
+rejected withdraw after health-factor pressure
+
+Starting post-failure state:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Failed large repay rollback check:
+
+failed repay result: Err(Ok(UnderlyingTransferFailed))
+
+Rollback telemetry after failed repay:
+
+failed repay collateral delta: 0
+failed repay debt delta: 0
+failed repay asset_b delta: 0
+
+Withdrawal pressure:
+
+Withdraw attempts 1–15 succeeded.
+Withdraw attempt 16 was rejected with:
+
+withdraw result: Err(Ok(HealthFactorTooLow))
+
+Rejected withdraw rollback telemetry:
+
+rejected withdraw collateral delta: 0
+rejected withdraw debt delta: 0
+rejected withdraw asset_a delta: 0
+rejected withdraw asset_b delta: 0
+
+Final repay retry:
+
+final repay result: Err(Ok(UnderlyingTransferFailed))
+
+Final telemetry:
+
+final collateral: 1,250,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 1,062,499,998,937,500,001
+final asset_a balance: 8,750,000,000
+final asset_b balance: 11,000,000,010
+collateral removed from start: 3,750,000,000,000,000,000
+debt delta from start: 0
+asset_a delta from start: 3,750,000,000
+asset_b delta from start: 0
+
+Interpretation:
+
+Phase 7G confirmed that failed repay and rejected withdraw operations preserved rollback invariants under tested conditions.
+
+This is a negative-control result, but it strengthens the report because it narrows the issue.
+
+The stronger validated pattern is not failed-operation mutation. The stronger validated pattern is:
+
+large repayment continues failing
+accepted collateral withdrawals reduce collateral as expected
+health-factor enforcement eventually blocks further withdrawals
+rejected operations roll back correctly
+accounting remains internally consistent
+
+Result:
+
+Rollback invariants preserved for tested failed repay and rejected withdraw paths.
+
+Phase 7H — Low Health Factor Borrow Enforcement Probe
+
+Phase 7H tested whether the protocol correctly rejects borrow attempts after collateral degradation and repayment-boundary instability.
+
+Test stages:
+
+1. Reproduce repayment failure boundary.
+2. Apply controlled collateral withdrawal pressure.
+3. Attempt borrowing under degraded health factor.
+4. Validate final repay behavior and telemetry consistency.
+
+Boundary result:
+
+Cycle 10 triggered:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Collateral withdrawal pressure:
+
+Withdrawals were accepted repeatedly.
+Health factor declined predictably.
+Debt remained constant.
+Asset balances updated consistently.
+
+Health factor progressed approximately from:
+
+4.24 → 4.03 → 3.82 → 3.61 → 3.39 → 3.18 → 2.97 → 2.76 → 2.54 → 2.33 → 2.12 → 1.91 → 1.69 → 1.48 → 1.27 → 1.06
+
+At withdrawal pressure cycle 16:
+
+Err(Ok(HealthFactorTooLow))
+
+Low-health borrow attempts tested:
+
+1
+1,000
+1,000,000
+100,000,000
+1,000,000,000
+
+All borrow attempts returned:
+
+Err(Ok(InsufficientCollateral))
+
+Observed invariant preservation:
+
+debt delta: 0
+asset_b delta: 0
+collateral unchanged
+health factor unchanged
+
+Final repay validation:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Interpretation:
+
+Phase 7H showed that borrow-side enforcement remains intact after repayment-boundary instability and collateral degradation.
+
+No borrow bypass occurred. No failed borrow partially executed. No phantom debt or hidden asset transfer appeared. Borrow validation appears to execute before mutation.
+
+This is another important narrowing result.
+
+The repayment instability remains valid, but Phase 7H did not produce evidence of borrow-side invariant failure or collateral escape beyond health-factor enforcement.
+
+Result:
+
+Low-health borrow enforcement confirmed; no borrow bypass observed.
+
+Phase 7I — Cross-Operation Stale State Probe
+
+Phase 7I tested whether stale state could propagate across mixed operation sequences after a failure boundary and low-health-factor state were established.
+
+The test targeted:
+
+stale cached accounting
+partial rollback leakage
+delayed invariant recomputation
+cross-operation state contamination
+repayment/withdrawal contamination after failed borrow
+
+Sequence:
+
+The account was driven into a low-health-factor state through controlled collateral withdrawal pressure.
+
+Withdrawal enforcement activated at approximately:
+
+1.062499999e18 health factor
+
+Further withdrawals were rejected with:
+
+HealthFactorTooLow
+
+Mixed-operation stale-state validation:
+
+Step 1 — failed borrow under low-health conditions:
+
+Borrow rejected with InsufficientCollateral.
+No debt expansion occurred.
+No collateral mutation occurred.
+Asset balances remained unchanged.
+
+Step 2 — small repayment after failed borrow:
+
+Small repayment succeeded.
+Debt reduced by expected amount.
+asset_b balance adjusted consistently.
+No unexpected normalization jump occurred.
+
+Step 3 — withdrawal after failed borrow and repayment:
+
+Withdrawal remained rejected with HealthFactorTooLow.
+Collateral access did not unlock incorrectly.
+Enforcement state remained stable.
+
+Step 4 — large repayment retry:
+
+Large repayment failed with UnderlyingTransferFailed.
+Boundary behavior remained deterministic.
+No hidden state corruption or rollback inconsistency appeared.
+
+Interpretation:
+
+Phase 7I tested a common DeFi failure class: stale state contamination across rejected operations.
+
+No stale-state contamination was observed. Failed operations remained non-mutating. Enforcement boundaries persisted correctly. Repayment did not accidentally unlock restricted paths. State normalization remained deterministic.
+
+Result:
+
+No stale-state invariant bypass or cross-operation state corruption observed.
+
+Phase 7J — Long Run Failed Repay Stability Probe
+
+Phase 7J tested whether repeated failed repayment attempts can induce hidden mutation, rollback drift, or cumulative accounting instability.
+
+Test structure:
+
+After setup validation, the protocol entered a loop of 100 consecutive failed repay attempts.
+
+Each failed attempt returned:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Tracked across 100 attempts:
+
+collateral integrity
+debt integrity
+asset_a balance stability
+asset_b balance stability
+rollback determinism
+state persistence consistency
+checkpoint reproducibility
+hidden mutation behavior
+long-run replay stability
+
+Observed across all 100 iterations:
+
+failed repay count increased deterministically
+successful repay count remained zero
+collateral delta remained zero
+debt delta remained zero
+asset_a delta remained zero
+asset_b delta remained zero
+checkpoint telemetry remained internally consistent
+
+Interpretation:
+
+Phase 7J showed that repeated failed repay attempts do not accumulate hidden mutation under the tested conditions.
+
+This weakens any claim of cumulative failed-operation corruption. It strengthens confidence that the repayment failure is deterministic and persistent but rollback-stable.
+
+Result:
+
+No state corruption, replay drift, balance mutation, or hidden failed-operation accumulation observed during 100 failed repay attempts.
+
+Phase 7K — Multi-Failure Rollback Matrix Probe
+
+Phase 7K tested whether repeated mixed failure paths mutate state after the system enters degraded low-health-factor conditions.
+
+Test sequence:
+
+1. Standard setup borrow/repay cycles.
+2. Reproduce known repayment boundary.
+3. Apply low-health-factor withdrawal pressure.
+4. Enter multi-failure rollback matrix.
+5. Repeat failed repay, failed borrow, and failed withdraw checks across 10 rounds.
+6. Capture final telemetry.
+
+Boundary result:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+Matrix start state:
+
+collateral: 1,250,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 1,062,499,998,937,500,001
+asset_a balance: 8,750,000,000
+asset_b balance: 11,000,000,010
+
+Each matrix round tested:
+
+failed repay:
+
+Err(Ok(UnderlyingTransferFailed))
+
+failed borrow:
+
+Err(Ok(InsufficientCollateral))
+
+failed withdraw:
+
+Err(Ok(HealthFactorTooLow))
+
+Across all failed operations, observed deltas remained zero:
+
+repay collateral delta: 0
+repay debt delta: 0
+repay asset_a delta: 0
+repay asset_b delta: 0
+borrow collateral delta: 0
+borrow debt delta: 0
+borrow asset_a delta: 0
+borrow asset_b delta: 0
+withdraw collateral delta: 0
+withdraw debt delta: 0
+withdraw asset_a delta: 0
+withdraw asset_b delta: 0
+
+Final counts:
+
+failed repay count: 10
+failed borrow count: 10
+failed withdraw count: 10
+
+Final telemetry:
+
+final collateral: 1,250,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 1,062,499,998,937,500,001
+final asset_a balance: 8,750,000,000
+final asset_b balance: 11,000,000,010
+
+Final matrix deltas:
+
+collateral delta from matrix start: 0
+debt delta from matrix start: 0
+asset_a delta from matrix start: 0
+asset_b delta from matrix start: 0
+
+Interpretation:
+
+Phase 7K confirmed strong rollback behavior across multiple rejected operation classes.
+
+Repeated failed repay, failed borrow, and failed withdraw attempts did not mutate account state under degraded-health conditions.
+
+This is a strong negative-control result. It does not prove exploitability, but it strengthens the credibility of the report by showing that suspected rollback-failure paths were tested and did not produce corruption.
+
+Result:
+
+No multi-failure rollback corruption, stale-state leakage, or accounting drift observed.
+
+Consolidated Phase 7 Findings
+
+Phase 7 established a more precise impact picture.
+
+Positive impact-relevant findings:
+
+1. The repayment boundary remains deterministic.
+2. After the failure, collateral withdrawal remains available.
+3. Active debt remains present while collateral can be reduced.
+4. Health factor declines predictably as collateral exits.
+5. Larger repayment continues failing after collateral exit.
+6. Repeated collateral withdrawal can continue until health-factor enforcement blocks further withdrawal.
+7. Repayment behavior becomes amount-sensitive.
+8. Smaller or fragmented repayments can reduce debt while larger repayments fail.
+9. The repayment failure persists even after fragmented recovery behavior.
+10. The account remains active and callable after the boundary condition.
+
+Negative-control findings:
+
+1. Health-factor enforcement eventually blocks excessive withdrawal.
+2. Borrow attempts under degraded collateral are rejected with InsufficientCollateral.
+3. Failed large repay does not mutate state.
+4. Rejected withdraw does not mutate state.
+5. Failed borrow does not mutate state.
+6. Fragmented repayment did not create observable reserve desynchronization under tested parameters.
+7. Repeated failed repay attempts did not produce hidden mutation.
+8. Mixed failed-operation matrices preserved rollback invariants.
+9. Stale-state cross-operation contamination was not observed.
+10. No direct theft, insolvency, full health-factor bypass, or unauthorized collateral drain was proven in Phase 7 alone.
+
+Security Significance
+
+Phase 7 is significant because it moves the investigation beyond repayment failure persistence and into post-failure account behavior.
+
+The strongest validated Phase 7 behavior is:
+
+After deterministic repayment-boundary failure, the account can continue withdrawing collateral while active debt remains present and larger repayment remains unavailable, until normal health-factor enforcement eventually blocks further collateral exit.
+
+That is the central Phase 7 finding.
+
+The second major finding is:
+
+After the boundary condition, repayment becomes amount-sensitive. Smaller or fragmented repayments can reduce debt, while larger repayment attempts continue failing with UnderlyingTransferFailed.
+
+Together, these findings support a credible post-failure recovery-risk argument:
+
+repayment failure is persistent
+large repayment remains unavailable
+collateral exit remains available
+health factor can degrade
+fragmented repayment may be required to recover
+failed operations roll back correctly
+protocol accounting remains mostly internally consistent under tested paths
+
+This is not a clean “everything breaks” result. It is more precise:
+
+The protocol preserves many invariants, but the repayment path enters a deterministic amount-sensitive failure mode that changes user recovery behavior and allows collateral reduction while debt remains active.
+
+Impact Framing
+
+The strongest impact framing should avoid overclaiming.
+
+The evidence supports:
+
+persistent large-repayment failure
+repayment-size asymmetry
+collateral withdrawal under active unresolved debt
+health-factor degradation after repayment-boundary failure
+continued account activity after repayment failure
+fragmented repayment as a partial workaround
+potential liquidation-defense friction if large repayment fails at a critical moment
+operational risk where expected repayment behavior does not match actual protocol behavior
+
+The evidence does not yet support:
+
+reserve theft
+protocol insolvency
+full collateral drain
+complete health-factor bypass
+unauthorized withdrawal beyond health-factor limits
+borrow-side invariant bypass
+failed-operation state mutation
+cross-user contagion
+permanent fund loss
+confirmed bad debt creation
+
+Red-Team Interpretation
+
+Phase 7 is strong because it does not only show positive signals. It also documents the limits.
+
+The protocol did several things correctly:
+
+health-factor checks eventually blocked withdrawal
+borrow enforcement worked under low collateral
+failed operations rolled back cleanly
+fragmented repayments reduced debt consistently
+reserve accounting remained synchronized under tested repayment fragments
+long-run failed repay replay did not mutate state
+multi-failure rollback matrix preserved deltas
+
+These negative controls are important. They prevent the report from looking exaggerated.
+
+The strongest remaining issue is not broad accounting collapse.
+
+The strongest remaining issue is:
+
+a deterministic large-repayment failure boundary that persists after trigger, coexists with continued collateral withdrawal, and forces amount-sensitive or fragmented repayment behavior during recovery.
+
+This is the cleanest professional Phase 7 claim.
+
+Relationship to Later Phases
+
+Phase 7 narrowed the investigation substantially.
+
+It showed that the issue is not:
+
+a total account freeze
+a full repayment lock
+a full collateral drain
+a failed-operation mutation bug
+a borrow bypass
+a stale-state contamination bug
+or a reserve desynchronization bug under tested paths
+
+Instead, Phase 7 showed that the most defensible issue is:
+
+large repayment failure persistence combined with post-failure collateral exit and amount-sensitive repayment recovery.
+
+This naturally leads into Phase 8, where the next question becomes:
+
+Can repayment recovery restore collateral accessibility and protect the user from liquidation-adjacent conditions, or does the large-repay boundary create trapped collateral, delayed recovery, or forced fragmented defense behavior?
+
+Professional Conclusion
+
+Phase 7 successfully converted the post-failure repayment instability from Phase 6 into a more complete post-boundary impact analysis.
+
+The tests showed that after the known repayment failure boundary is triggered, the account remains callable, collateral withdrawal remains available, and active debt persists. Substantial collateral can be withdrawn while health factor declines, and normal health-factor enforcement eventually blocks further withdrawal. Larger repayment attempts continue failing with UnderlyingTransferFailed, while smaller or fragmented repayments can still reduce debt.
+
+The most important Phase 7 conclusion is:
+
+The repayment failure is not an isolated failed call. It creates a persistent post-boundary state where larger repayment remains unavailable, collateral withdrawal can continue under normal health-factor limits, and repayment recovery becomes amount-sensitive.
+
+Phase 7 does not prove direct asset theft, insolvency, full health-factor bypass, or failed-operation corruption. It does establish a serious and reproducible post-failure behavior pattern that may be relevant to repayment reliability, user recovery, liquidation defense, and protocol-state consistency under boundary conditions.
+
+This phase should be presented as a high-value impact-validation phase that strengthens the submission through both positive findings and negative controls.
