@@ -1,0 +1,70 @@
+// ---------- PHASE 4C: Residual Accumulation Cycle Check ----------
+
+println!("--- PHASE 4C: RESIDUAL ACCUMULATION CYCLE CHECK ---");
+
+let cycles: u32 = 10;
+let borrow_amount: u128 = 1_000_000_001;
+let repay_amount: u128 = 1_000_000_000;
+
+println!("cycles: {:?}", cycles);
+println!("borrow_amount per cycle: {:?}", borrow_amount);
+println!("repay_amount per cycle: {:?}", repay_amount);
+println!("expected nominal gap per cycle: 1");
+
+for i in 0..cycles {
+    println!("--- CYCLE {:?} BEFORE BORROW ---", i + 1);
+    let before = setup.router.get_user_account_data(&setup.user);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", before.total_collateral_base);
+    println!("debt: {:?}", before.total_debt_base);
+    println!("health factor: {:?}", before.health_factor);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("--- CYCLE {:?} AFTER BORROW ---", i + 1);
+    let after_borrow = setup.router.get_user_account_data(&setup.user);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_borrow.total_collateral_base);
+    println!("debt: {:?}", after_borrow.total_debt_base);
+    println!("health factor: {:?}", after_borrow.health_factor);
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("--- CYCLE {:?} AFTER PARTIAL REPAY ---", i + 1);
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_repay.total_collateral_base);
+    println!("debt: {:?}", after_repay.total_debt_base);
+    println!("health factor: {:?}", after_repay.health_factor);
+}
+
+println!("--- PHASE 4C FINAL CHECK ---");
+let final_account = setup.router.get_user_account_data(&setup.user);
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("final collateral: {:?}", final_account.total_collateral_base);
+println!("final debt: {:?}", final_account.total_debt_base);
+println!("final health factor: {:?}", final_account.health_factor);
+println!("expected nominal accumulated gap: {:?}", cycles);
+
+assert_eq!(
+    final_account.total_debt_base,
+    0,
+    "repeated 1-unit residual cycles should remain fully normalized to zero if dust behavior is consistent"
+);

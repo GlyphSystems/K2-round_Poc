@@ -1,0 +1,62 @@
+// ---------- PHASE 4B: Larger Residual Boundary Check ----------
+
+let borrow_amount: u128 = 1_000_000_001;
+let repay_amount: u128 = 999_999_999;
+
+println!("--- PHASE 4B: LARGER RESIDUAL BOUNDARY CHECK ---");
+
+println!("--- BEFORE BORROW ---");
+let before_borrow = setup.router.get_user_account_data(&setup.user);
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", before_borrow.total_collateral_base);
+println!("debt: {:?}", before_borrow.total_debt_base);
+println!("health factor: {:?}", before_borrow.health_factor);
+
+println!("--- ACTION: BORROW ---");
+println!("borrow_amount: {:?}", borrow_amount);
+
+setup.router.borrow(
+    &setup.user,
+    &setup.asset_b,
+    &borrow_amount,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+println!("--- AFTER BORROW ---");
+let after_borrow = setup.router.get_user_account_data(&setup.user);
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_borrow.total_collateral_base);
+println!("debt: {:?}", after_borrow.total_debt_base);
+println!("health factor: {:?}", after_borrow.health_factor);
+
+println!("--- ACTION: PARTIAL REPAY ---");
+println!("repay_amount: {:?}", repay_amount);
+
+setup.router.repay(
+    &setup.user,
+    &setup.asset_b,
+    &repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!("--- AFTER PARTIAL REPAY ---");
+let after_repay = setup.router.get_user_account_data(&setup.user);
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_repay.total_collateral_base);
+println!("debt: {:?}", after_repay.total_debt_base);
+println!("health factor: {:?}", after_repay.health_factor);
+
+println!("--- PHASE 4B CHECK ---");
+println!("expected principal-level gap: 2");
+println!("observed debt base: {:?}", after_repay.total_debt_base);
+
+assert!(
+    after_repay.total_debt_base > 0,
+    "2-unit residual should leave measurable non-zero debt"
+);

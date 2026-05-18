@@ -1,0 +1,133 @@
+// ---------- PHASE 4F: Same-User Post-Saturation Follow-Up Check ----------
+
+println!("--- PHASE 4F: SAME-USER POST-SATURATION FOLLOW-UP CHECK ---");
+
+let saturation_cycles: u32 = 10;
+let saturation_borrow: u128 = 1_000_000_001;
+let saturation_repay: u128 = 1_000_000_000;
+
+let followup_supply: u128 = 2_000_000_000;
+let followup_borrow: u128 = 500_000_000;
+
+println!("saturation_cycles: {:?}", saturation_cycles);
+println!("saturation_borrow: {:?}", saturation_borrow);
+println!("saturation_repay: {:?}", saturation_repay);
+println!("followup_supply: {:?}", followup_supply);
+println!("followup_borrow: {:?}", followup_borrow);
+
+println!("--- INITIAL STATE ---");
+let initial =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+// ----------------------------------------------------
+// STEP 1 — Same-user residual saturation
+// ----------------------------------------------------
+
+println!("--- STEP 1: SAME-USER RESIDUAL SATURATION ---");
+
+for i in 0..saturation_cycles {
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &saturation_borrow,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &saturation_repay,
+        &1u32,
+        &setup.user,
+    );
+
+    let saturation_state =
+        setup.router.get_user_account_data(&setup.user);
+
+    println!("--- SATURATION CYCLE {:?} ---", i + 1);
+    println!("debt: {:?}", saturation_state.total_debt_base);
+    println!("collateral: {:?}", saturation_state.total_collateral_base);
+    println!("health factor: {:?}", saturation_state.health_factor);
+
+    assert_eq!(
+        saturation_state.total_debt_base,
+        0,
+        "same-user saturation residual should normalize to zero"
+    );
+}
+
+// ----------------------------------------------------
+// STEP 2 — Same user performs normal follow-up supply
+// ----------------------------------------------------
+
+println!("--- STEP 2: FOLLOW-UP SUPPLY AFTER SATURATION ---");
+
+setup.router.supply(
+    &setup.user,
+    &setup.asset_a,
+    &followup_supply,
+    &setup.user,
+    &0u32,
+);
+
+let after_supply =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_supply.total_collateral_base);
+println!("debt: {:?}", after_supply.total_debt_base);
+println!("health factor: {:?}", after_supply.health_factor);
+
+assert_eq!(
+    after_supply.total_debt_base,
+    0,
+    "follow-up supply should not revive normalized residual debt"
+);
+
+// ----------------------------------------------------
+// STEP 3 — Same user performs normal follow-up borrow
+// ----------------------------------------------------
+
+println!("--- STEP 3: FOLLOW-UP BORROW AFTER SATURATION ---");
+
+setup.router.borrow(
+    &setup.user,
+    &setup.asset_b,
+    &followup_borrow,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+let final_state =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("--- FINAL STATE ---");
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", final_state.total_collateral_base);
+println!("debt: {:?}", final_state.total_debt_base);
+println!("health factor: {:?}", final_state.health_factor);
+
+// ----------------------------------------------------
+// VALIDATION
+// ----------------------------------------------------
+
+assert!(
+    final_state.total_debt_base > 0,
+    "follow-up borrow should create measurable debt"
+);
+
+assert!(
+    final_state.health_factor > 0,
+    "health factor should remain valid after same-user post-saturation follow-up"
+);

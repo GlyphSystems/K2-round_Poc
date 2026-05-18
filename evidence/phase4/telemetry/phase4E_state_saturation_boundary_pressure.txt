@@ -1,0 +1,78 @@
+// ---------- PHASE 4E: State Saturation / Boundary Pressure Check ----------
+
+println!("--- PHASE 4E: STATE SATURATION / BOUNDARY PRESSURE CHECK ---");
+
+let cycles: u32 = 25;
+let borrow_amount: u128 = 1_000_000_001;
+let repay_amount: u128 = 1_000_000_000;
+let checkpoint_interval: u32 = 5;
+
+println!("cycles: {:?}", cycles);
+println!("borrow_amount per cycle: {:?}", borrow_amount);
+println!("repay_amount per cycle: {:?}", repay_amount);
+println!("checkpoint_interval: {:?}", checkpoint_interval);
+
+let initial = setup.router.get_user_account_data(&setup.user);
+println!("--- INITIAL STATE ---");
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+for i in 0..cycles {
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    let account = setup.router.get_user_account_data(&setup.user);
+
+    if (i + 1) % checkpoint_interval == 0 {
+        println!("--- CHECKPOINT CYCLE {:?} ---", i + 1);
+        println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+        println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+        println!("collateral: {:?}", account.total_collateral_base);
+        println!("debt: {:?}", account.total_debt_base);
+        println!("health factor: {:?}", account.health_factor);
+    }
+
+    assert_eq!(
+        account.total_debt_base,
+        0,
+        "boundary dust should remain normalized after each cycle"
+    );
+}
+
+let final_account = setup.router.get_user_account_data(&setup.user);
+
+println!("--- PHASE 4E FINAL STATE ---");
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("final collateral: {:?}", final_account.total_collateral_base);
+println!("final debt: {:?}", final_account.total_debt_base);
+println!("final health factor: {:?}", final_account.health_factor);
+println!("expected nominal forgiven micro-gap count: {:?}", cycles);
+
+assert_eq!(
+    final_account.total_debt_base,
+    0,
+    "final debt should remain zero after saturation pressure"
+);
+
+assert!(
+    final_account.health_factor > 0,
+    "health factor should remain valid after saturation pressure"
+);

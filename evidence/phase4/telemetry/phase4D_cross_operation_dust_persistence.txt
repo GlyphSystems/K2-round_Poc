@@ -1,0 +1,117 @@
+// ---------- PHASE 4D: Cross-Operation Dust Persistence Check ----------
+
+println!("--- PHASE 4D: CROSS-OPERATION DUST PERSISTENCE CHECK ---");
+
+let borrow_amount: u128 = 1_000_000_001;
+let repay_amount: u128 = 1_000_000_000;
+let withdraw_amount: u128 = 1_000_000;
+let second_borrow_amount: u128 = 500_000_000;
+
+println!("borrow_amount: {:?}", borrow_amount);
+println!("repay_amount: {:?}", repay_amount);
+println!("withdraw_amount: {:?}", withdraw_amount);
+println!("second_borrow_amount: {:?}", second_borrow_amount);
+
+println!("--- INITIAL STATE ---");
+let initial = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+// STEP 1 — Create residual boundary condition
+
+println!("--- STEP 1: PRIMARY BORROW ---");
+
+setup.router.borrow(
+    &setup.user,
+    &setup.asset_b,
+    &borrow_amount,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+let after_borrow = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_borrow.total_collateral_base);
+println!("debt: {:?}", after_borrow.total_debt_base);
+println!("health factor: {:?}", after_borrow.health_factor);
+
+// STEP 2 — Normalize with partial repay
+
+println!("--- STEP 2: PARTIAL REPAY NORMALIZATION ---");
+
+setup.router.repay(
+    &setup.user,
+    &setup.asset_b,
+    &repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+let after_repay = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_repay.total_collateral_base);
+println!("debt: {:?}", after_repay.total_debt_base);
+println!("health factor: {:?}", after_repay.health_factor);
+
+// STEP 3 — Cross-operation transition: withdraw
+
+println!("--- STEP 3: WITHDRAW AFTER NORMALIZATION ---");
+
+setup.router.withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &withdraw_amount,
+    &setup.user,
+);
+
+let after_withdraw = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", after_withdraw.total_collateral_base);
+println!("debt: {:?}", after_withdraw.total_debt_base);
+println!("health factor: {:?}", after_withdraw.health_factor);
+
+// STEP 4 — Cross-operation transition: second borrow
+
+println!("--- STEP 4: SECOND BORROW AFTER NORMALIZATION ---");
+
+setup.router.borrow(
+    &setup.user,
+    &setup.asset_b,
+    &second_borrow_amount,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+let final_account = setup.router.get_user_account_data(&setup.user);
+
+println!("--- FINAL STATE ---");
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", final_account.total_collateral_base);
+println!("debt: {:?}", final_account.total_debt_base);
+println!("health factor: {:?}", final_account.health_factor);
+
+// VALIDATION
+
+assert!(
+    final_account.total_debt_base > 0,
+    "second borrow should create measurable debt state"
+);
+
+assert!(
+    final_account.health_factor > 0,
+    "health factor should remain valid after cross-operation transitions"
+);

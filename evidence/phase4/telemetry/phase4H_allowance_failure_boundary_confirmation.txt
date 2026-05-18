@@ -1,0 +1,115 @@
+// ---------- PHASE 4H: Allowance Failure Boundary Confirmation ----------
+
+println!("--- PHASE 4H: ALLOWANCE FAILURE BOUNDARY CONFIRMATION ---");
+
+let cycles: u32 = 12;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+println!("cycles: {:?}", cycles);
+println!("borrow_pattern: {:?}", borrow_pattern);
+println!("repay_pattern: {:?}", repay_pattern);
+
+println!("--- INITIAL STATE ---");
+let initial = setup.router.get_user_account_data(&setup.user);
+
+println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("collateral: {:?}", initial.total_collateral_base);
+println!("debt: {:?}", initial.total_debt_base);
+println!("health factor: {:?}", initial.health_factor);
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("====================================================");
+    println!("--- PHASE 4H CYCLE {:?} ---", i + 1);
+    println!("borrow_amount: {:?}", borrow_amount);
+    println!("repay_amount: {:?}", repay_amount);
+
+    let before_cycle = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- BEFORE BORROW ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", before_cycle.total_collateral_base);
+    println!("debt: {:?}", before_cycle.total_debt_base);
+    println!("health factor: {:?}", before_cycle.health_factor);
+
+    println!("--- ACTION: BORROW ---");
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    let after_borrow = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER BORROW / BEFORE REPAY ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_borrow.total_collateral_base);
+    println!("debt: {:?}", after_borrow.total_debt_base);
+    println!("health factor: {:?}", after_borrow.health_factor);
+
+    println!("--- ACTION: REPAY ---");
+    println!("repay_attempt_amount: {:?}", repay_amount);
+    println!(
+        "asset_b balance immediately before repay: {:?}",
+        setup.asset_b_token.balance(&setup.user)
+    );
+
+    setup.router.repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+
+    println!("--- AFTER REPAY ---");
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+    println!("collateral: {:?}", after_repay.total_collateral_base);
+    println!("debt: {:?}", after_repay.total_debt_base);
+    println!("health factor: {:?}", after_repay.health_factor);
+
+    assert_eq!(
+        after_repay.total_debt_base,
+        0,
+        "debt should normalize to zero after each patterned repay before failure boundary"
+    );
+}
+
+let final_account = setup.router.get_user_account_data(&setup.user);
+
+println!("--- PHASE 4H FINAL STATE ---");
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+println!("final collateral: {:?}", final_account.total_collateral_base);
+println!("final debt: {:?}", final_account.total_debt_base);
+println!("final health factor: {:?}", final_account.health_factor);
+
+assert_eq!(
+    final_account.total_debt_base,
+    0,
+    "final debt should remain zero if boundary does not fail"
+);
