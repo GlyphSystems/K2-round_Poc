@@ -1,0 +1,780 @@
+Phase 9 Summary — Logic Engine Economic Delta Analysis and Minimal Reproduction Candidate Mapping
+
+Objective
+
+Phase 9 was designed to supplement the protocol-level findings from Phases 4 through 8 with high-volume economic state analysis.
+
+Earlier phases used the real K2/C4 protocol harness to validate repayment-boundary behavior, persistent large-repayment failure, collateral withdrawal under active debt, amount-sensitive repayment behavior, fragmented repayment recovery, and recovery-path limitations.
+
+Phase 9 shifted into Logic Engine analysis.
+
+The objective was to determine whether the observed repayment-boundary behavior had a broader economic structure behind it. Specifically, Phase 9 tested whether supply, borrow, repay, and withdraw sequences could produce deterministic accounting asymmetry, persistent residual debt, phantom debt-share formation, modeled protocol shortfall, or extraction-path candidate behavior under repeated and constrained economic state transitions.
+
+The purpose of Phase 9 was not to replace the real protocol harness evidence. The purpose was to identify and compress candidate economic patterns that may explain, amplify, or reproduce the repayment asymmetry observed in the protocol-level phases.
+
+Scope
+
+Phase 9 focused on:
+
+- supply → borrow → repay → withdraw sequence modeling
+- debt-share mint and burn asymmetry
+- repayment-size imbalance
+- phantom debt-share persistence
+- residual debt-value persistence
+- modeled economic delta
+- modeled protocol shortfall
+- re-entry persistence
+- replay-stable imbalance behavior
+- boundary collapse conditions
+- minimal reproduction candidates
+- healthy-control counterfactual requirements
+
+All Phase 9 findings should be interpreted as simulation-layer economic evidence unless and until converted into protocol-real reproduction inside the official K2/C4 harness.
+
+Methodology
+
+The Logic Engine was configured to evaluate large numbers of accounting-state transitions while preserving compact telemetry rather than raw per-cycle logs.
+
+The engine generated:
+
+- aggregate anomaly counts
+- top-ranked anomaly hits
+- modeled delta values
+- phantom debt-share measurements
+- phantom debt-value measurements
+- signature compression outputs
+- replay-stability measurements
+- constrained-path candidate results
+- minimal reproduction candidates
+
+The engine intentionally avoided exposing proprietary implementation details. Output was limited to reviewer-relevant economic telemetry.
+
+The core testing logic evaluated whether specific transaction structures could repeatedly create a mismatch between:
+
+- supplied capital
+- borrowed capital
+- repaid capital
+- withdrawn value
+- debt shares minted
+- debt shares burned
+- residual debt shares
+- residual debt value
+- final modeled output
+- modeled protocol shortfall
+
+Phase 9A — Economic Delta Sweep
+
+Phase 9A executed the first broad Logic Engine delta sweep.
+
+Configuration:
+
+- start input: 1
+- end input: 250,000
+- total sequences tested: 250,000
+- runtime: approximately 0.6048 seconds
+
+Observed totals:
+
+- total_sequences_tested: 250,000
+- total_anomalies_found: 250,000
+- delta_nonzero_count: 250,000
+- phantom_debt_share_count: 249,999
+- phantom_debt_value_count: 249,999
+- final_output_less_than_input_count: 250,000
+
+Representative anomaly pattern:
+
+- debt shares minted: 1
+- debt shares burned: 0
+- phantom debt shares remaining: 1
+- phantom debt value: 2
+- final delta: -3
+
+Interpretation:
+
+Phase 9A demonstrated that the Logic Engine could rapidly identify deterministic accounting asymmetry patterns across a broad input range.
+
+This phase did not prove exploitability. Its value was anomaly discovery. It confirmed that economic delta, phantom debt-share residue, and final-output loss patterns could be detected consistently and compactly.
+
+Phase 9B — Residue Accumulation Analysis
+
+Phase 9B tested whether the residue behavior from Phase 9A was isolated or accumulative.
+
+Configuration:
+
+- 12 input configurations tested
+- 100,000 cycles per input
+- 1,200,000 total cycles
+- runtime: approximately 0.0003 seconds
+
+Inputs tested:
+
+- 2
+- 3
+- 4
+- 5
+- 10
+- 25
+- 50
+- 100
+- 1,000
+- 10,000
+- 100,000
+- 250,000
+
+Observed totals:
+
+- total_inputs_tested: 12
+- total_cycles_tested: 1,200,000
+- total_accumulation_hits: 12
+- delta_nonzero_input_cases: 12
+- phantom_debt_share_input_cases: 12
+- phantom_debt_value_input_cases: 12
+
+Observed deterministic residue pattern:
+
+- per_cycle_delta: -3
+- per_cycle_phantom_debt_shares: 1
+- per_cycle_phantom_debt_value: 2
+
+Example accumulation for input 2:
+
+- cycles: 100,000
+- total_delta: -300,000
+- total_phantom_debt_shares: 100,000
+- total_phantom_debt_value: 200,000
+- final_virtual_output: -100,000
+
+Example accumulation for input 250,000:
+
+- cycles: 100,000
+- total_delta: -300,000
+- total_phantom_debt_shares: 100,000
+- total_phantom_debt_value: 200,000
+- final_virtual_output: 24,999,700,000
+
+Interpretation:
+
+Phase 9B showed that the modeled residue did not self-correct, decay, or randomize under repeated replay. The per-cycle imbalance remained constant across tested inputs.
+
+The important finding was that residue appeared tied to sequence structure rather than input magnitude.
+
+Phase 9D — Wide State Sweep
+
+Phase 9D expanded the analysis into wide economic state exploration.
+
+Configuration:
+
+- scenario target: 1,000,000
+- actual scenarios tested: 85,176
+- runtime: approximately 0.2677 seconds
+
+Parameter domains included:
+
+Input values:
+
+- 2 through 10,000,000
+
+Borrow ratios:
+
+- 1/4
+- 1/3
+- 1/2
+- 2/3
+- 3/4
+- 9/10
+
+Repay ratios:
+
+- 1/4
+- 1/3
+- 1/2
+- 2/3
+- 3/4
+- 1/1
+
+Observed totals:
+
+- total_hits: 82,053
+- delta_nonzero_count: 82,053
+- phantom_debt_count: 81,081
+- final_output_less_than_input_count: 82,053
+- minted_debt_exceeds_burned_count: 81,081
+
+Strongest observed amplification structure:
+
+- input_value: 10,000,000
+- borrow_ratio: 9/10
+- repay_ratio: 1/4
+- liquidity_offset: 1
+- borrow_offset: 1
+
+Observed telemetry:
+
+- supplied_capital: 10,000,000
+- borrowed_capital: 9,000,000
+- debt_shares_minted: 9,000,000
+- repaid_capital: 2,250,000
+- debt_shares_burned: 2,249,999
+- phantom_debt_shares: 6,750,001
+- phantom_debt_value: 6,750,002
+- final_output: 3,249,997
+- delta: -6,750,003
+- loss_ratio_ppm: 675,000
+
+Modeled imbalance ratio:
+
+- approximately 67.5% relative to supplied capital
+
+Interpretation:
+
+Phase 9D showed that the modeled behavior was not limited to fixed dust residue. Under aggressive borrow ratios and partial repayment structures, the imbalance scaled materially.
+
+This phase identified ratio-sensitive amplification as a major candidate pattern.
+
+Phase 9E — Ten-Million Scenario Signature Scout
+
+Phase 9E performed large-scale signature compression.
+
+Configuration:
+
+- scenario target: 10,000,000
+- actual scenarios tested: 10,000,000
+- runtime: approximately 54.1912 seconds
+
+Observed totals:
+
+- total_hits: 9,633,326
+- unique_signatures_found: 2,469
+- delta_nonzero_count: 9,633,326
+- phantom_debt_count: 9,633,326
+- final_output_less_than_input_count: 9,633,326
+- minted_debt_exceeds_burned_count: 9,633,326
+- loss_over_10_percent_count: 7,726,785
+- loss_over_50_percent_count: 4,426,858
+
+Strongest amplification structure:
+
+- input_value: 100,000,000
+- borrow_ratio: 99/100
+- repay_ratio: 1/100
+- liquidity_offset: 191
+- borrow_offset: 174
+
+Observed telemetry:
+
+- supplied_capital: 100,000,000
+- shares_received: 99,999,999
+- borrowed_capital: 99,000,000
+- debt_shares_minted: 99,000,000
+- repaid_capital: 990,000
+- debt_shares_burned: 989,999
+- phantom_debt_shares: 98,010,001
+- phantom_debt_value: 98,010,002
+- final_output: 1,989,997
+- delta: -98,010,003
+- loss_ratio_ppm: 980,100
+
+Modeled imbalance ratio:
+
+- approximately 98.01% relative to supplied capital
+
+Signature compression result:
+
+- 10,000,000 scenarios compressed into 2,469 unique anomaly signatures
+
+Top repeating signature:
+
+- borrow=99/100
+- repay=1/100
+- observed repetition count: 3,334
+
+Top signature families included:
+
+- 99/100 borrow with 1/100 repay
+- 19/20 borrow with 1/100 repay
+- 99/100 borrow with 1/20 repay
+- 19/20 borrow with 1/20 repay
+- 9/10 borrow with 1/100 repay
+
+Observed loss ranges:
+
+- approximately 79% to 98% modeled imbalance ratios
+
+Interpretation:
+
+Phase 9E materially improved the investigation by compressing millions of scenarios into ranked anomaly families.
+
+The strongest result was not a one-off edge case. The same economic structure repeatedly generated similar imbalance behavior across many offset combinations.
+
+This moved the analysis from isolated anomaly detection into anomaly-family classification.
+
+Phase 9F — Signature Confirmation
+
+Phase 9F replayed the strongest signatures from Phase 9E under controlled conditions.
+
+Configuration:
+
+- top signatures tested: 10
+- offset tests per signature: 8
+- replay-cycle windows: 1, 2, 5, 10, 25, 100, 1,000, 10,000
+- total confirmation rows: 640
+
+Observed totals:
+
+- confirmed_delta_count: 640
+- confirmed_phantom_count: 640
+- confirmed_over_50_percent_count: 640
+- confirmed_over_90_percent_count: 256
+
+Strongest observed metrics:
+
+- strongest_abs_delta: 98,010,003
+- strongest_loss_ratio_ppm: 980,100
+- strongest_accumulated_delta: 980,100,030,000
+- strongest_accumulated_phantom_value: 980,100,020,000
+
+Strongest confirmed signature:
+
+- input_value: 100,000,000
+- borrow_ratio: 99/100
+- repay_ratio: 1/100
+
+Observed telemetry:
+
+- supplied_capital: 100,000,000
+- borrowed_capital: 99,000,000
+- debt_shares_minted: 99,000,000
+- repaid_capital: 990,000
+- debt_shares_burned: 989,999
+- phantom_debt_shares: 98,010,001
+- phantom_debt_value: 98,010,002
+- final_output: 1,989,997
+- delta: -98,010,003
+- loss_ratio_ppm: 980,100
+
+Replay persistence:
+
+At 10,000 replay cycles:
+
+- accumulated_delta: -980,100,030,000
+- accumulated_phantom_debt_shares: 980,100,010,000
+- accumulated_phantom_debt_value: 980,100,020,000
+
+Offset stability tested across:
+
+- 1 / 1
+- 73 / 183
+- 191 / 174
+- 242 / 374
+- 411 / 372
+- 478 / 397
+- 8191 / 8191
+
+Interpretation:
+
+Phase 9F confirmed that the strongest imbalance signatures remained deterministic, replay-stable, and offset-stable under controlled confirmation.
+
+This reduced the likelihood that the observed behavior was random noise or unstable rounding drift.
+
+Phase 9G / 9H — Chained State and Long-Duration Continuity
+
+Phases 9G and 9H moved from fixed replay into evolving-state continuity.
+
+Configuration:
+
+- controlled duration: 180 seconds
+- checkpoint interval: 15 seconds
+- signatures tested: 6
+- index drift patterns: 6
+
+Observed runtime results:
+
+- cycles_completed: 113,636,644
+- total_supplied: 11,363,664,400,000,000
+- total_borrowed: 10,928,057,268,000,000
+- total_repaid: 425,001,045,240,000
+- total_withdrawn: 11,363,664,286,363,356
+
+Observed replay residue:
+
+- total_phantom_debt_shares: 10,503,056,336,396,644
+- total_phantom_debt_value: 10,503,056,450,033,288
+
+Observed imbalance:
+
+- total_delta: -10,503,056,563,669,932
+- final_loss_ratio_ppm: 924,266
+
+Observed replay persistence:
+
+- over_50_percent_count: 113,636,644
+- over_90_percent_count: 75,757,764
+
+Interpretation flags:
+
+- CHAIN_DELTA_NONZERO: true
+- PHANTOM_VALUE_PERSISTED: true
+- OVER_90_PERCENT_MODEL_PRESENT: true
+
+Interpretation:
+
+Phases 9G and 9H showed that the modeled asymmetry survived long-duration evolving-state execution. The imbalance did not collapse during sustained continuity testing.
+
+These phases strengthened the hypothesis that the modeled behavior is structurally persistent across chained state transitions.
+
+Phase 9I — Extraction Path Model
+
+Phase 9I tested whether replay-stable imbalance could become externally positive under modeled conditions.
+
+Configuration:
+
+- signatures_tested: 6
+- chain_windows: 1, 2, 5, 10, 25, 100, 1,000
+- reentry_windows: 1, 2, 5, 10, 25, 100
+- total_paths_tested: 1,512
+
+Observed totals:
+
+- total_hits: 1,512
+- extraction_candidate_count: 1,512
+- insolvency_candidate_count: 1,512
+- over_50_percent_external_value_count: 1,512
+- over_90_percent_external_value_count: 1,008
+
+Strongest observed metrics:
+
+- strongest_net_external_position: 9,800,999,900,000
+- strongest_residual_debt_value: 9,801,000,200,000
+- strongest_protocol_shortfall_model: 300,000
+- strongest_extraction_ratio_ppm: 980,099
+
+Strongest modeled extraction-path structure:
+
+- borrow_ratio: 99/100
+- repay_ratio: 1/100
+- chain_window: 1,000
+- reentry_window: 100
+
+Observed telemetry:
+
+- total_supplied: 10,000,000,000,000
+- total_borrowed: 9,900,000,000,000
+- total_repaid: 99,000,000,000
+- total_withdrawn: 9,999,999,900,000
+- residual_debt_shares: 9,801,000,100,000
+- residual_debt_value: 9,801,000,200,000
+- external_value_moved: 19,899,999,900,000
+- net_external_position: 9,800,999,900,000
+- protocol_shortfall_model: 300,000
+- extraction_ratio_ppm: 980,099
+
+Interpretation:
+
+Phase 9I was the first Logic Engine phase where the modeled imbalance transitioned from internal residue into externally positive modeled movement.
+
+The model demonstrated simultaneous:
+
+- external value movement
+- residual debt persistence
+- positive modeled protocol shortfall
+
+Critical limitation:
+
+Phase 9I remains simulation-layer evidence. It does not independently prove live exploitability, production extraction, real insolvency, or direct protocol drain.
+
+Phase 9J — Boundary and Collapse Analysis
+
+Phase 9J tested where the modeled asymmetry collapses under defensive constraints.
+
+The objective was to determine whether the previously identified imbalance survives normalization pressure or whether repayment/reset constraints neutralize it.
+
+Parameter domains included:
+
+Input values:
+
+- 10,000
+- 100,000
+- 1,000,000
+- 10,000,000
+- 100,000,000
+
+Borrow ratios:
+
+- 1/4
+- 1/2
+- 2/3
+- 3/4
+- 9/10
+- 19/20
+- 99/100
+
+Repay ratios:
+
+- 1/100
+- 1/20
+- 1/10
+- 1/4
+- 1/2
+- 3/4
+- 9/10
+- 99/100
+- 1/1
+
+Chain windows:
+
+- 1
+- 5
+- 25
+- 100
+- 1,000
+
+Re-entry windows:
+
+- 1
+- 5
+- 25
+- 100
+
+Reset modes:
+
+- none
+- repay normalization
+- withdraw normalization
+- debt flush attempt
+
+Observed telemetry:
+
+- survived_count: 44,454
+- collapsed_count: 11,113
+- neutralized_count: 0
+
+Interpretation:
+
+Phase 9J was important because it did not only produce survivability. It also identified collapse conditions.
+
+This improved credibility. A model that only produces positive hits risks appearing unconstrained. Phase 9J showed conditional survivability, conditional collapse, repayment-ratio sensitivity, reset-path sensitivity, and continued convergence around specific stress patterns.
+
+Strong recurring structure:
+
+- borrow_ratio: 1/2
+- repay_ratio: 1/100
+- chain_window: 1,000
+- reentry_window: 100
+
+Interpretation:
+
+Phase 9J showed that the modeled signal is not random. It survives only under certain structural conditions and collapses under others.
+
+That is useful for narrowing future protocol-real reproduction.
+
+Phase 9L — Minimal Reproduction Candidate
+
+Phase 9L reduced the strongest surviving structures into compact reproduction candidates.
+
+Configuration:
+
+- total path evaluations: 259,200
+- elapsed_seconds: 56.118
+- stopped_by_runtime_cap: false
+
+Input values:
+
+- 100
+- 1,000
+- 10,000
+- 100,000
+- 1,000,000
+- 10,000,000
+
+Borrow ratios:
+
+- 1/4
+- 1/3
+- 1/2
+- 2/3
+- 3/4
+- 9/10
+- 19/20
+- 99/100
+
+Repay ratios:
+
+- 1/100
+- 1/20
+- 1/10
+- 1/4
+- 1/2
+- 3/4
+- 9/10
+- 99/100
+- 1/1
+
+Chain windows:
+
+- 1
+- 2
+- 5
+- 10
+- 25
+- 100
+
+Re-entry windows:
+
+- 1
+- 2
+- 5
+- 10
+- 25
+
+Constraint modes:
+
+- loose
+- health_checked
+- withdraw_guarded
+- repay_required_before_withdraw
+- full_protocol_guard
+
+Observed telemetry:
+
+- minimal_repro_candidate_count: 162,720
+
+Smallest successful candidate:
+
+- input_value: 100
+- borrow_ratio: 1/4
+- repay_ratio: 1/100
+- chain_window: 1
+- reentry_window: 1
+- constraint_mode: loose
+
+Resulting telemetry:
+
+- residual_debt_value: 26
+- net_external_position: 24
+- protocol_shortfall_model: 2
+
+Strongest constrained candidate:
+
+- input_value: 10,000,000
+- borrow_ratio: 2/3
+- repay_ratio: 1/4
+- chain_window: 25
+- reentry_window: 10
+- constraint_mode: full_protocol_guard
+
+Observed telemetry:
+
+- total_rejected_withdraws: 250
+- residual_debt_value: 1,250,000,500
+- protocol_shortfall_model: 2,500,000,500
+- extraction_candidate: false
+- shortfall_candidate: true
+- rejected_by_constraints: true
+
+Interpretation:
+
+Phase 9L materially improved reproducibility.
+
+The strongest outcome was that modeled persistence did not require massive replay windows or broad exploratory scans. Compact reproduction candidates survived.
+
+This is important because reviewers generally trust short deterministic reproduction paths more than huge brute-force sweeps.
+
+Phase 9L also shifted the strongest constrained behavior away from direct extraction and toward residual debt survivability and modeled shortfall persistence.
+
+That is a more realistic and defensible direction.
+
+Consolidated Phase 9 Findings
+
+Phase 9 established the following:
+
+1. Deterministic economic delta patterns exist in the Logic Engine model.
+2. Phantom debt-share residue appears repeatedly across tested state transitions.
+3. Residue can accumulate linearly across repeated replay cycles.
+4. Wide state sweeps show ratio-sensitive amplification.
+5. Signature compression identified repeatable anomaly families.
+6. The strongest families repeatedly involved aggressive borrow ratios and small repayment ratios.
+7. Controlled replay confirmed signature stability.
+8. Long-duration chained-state testing showed persistence under evolving state.
+9. Extraction-path modeling showed externally positive modeled movement under simulation constraints.
+10. Boundary testing showed both survivability and collapse behavior.
+11. Minimal reproduction testing identified compact candidate sequences.
+12. Under stricter constraints, the strongest surviving structures shifted toward modeled shortfall persistence rather than direct extraction.
+
+Security Significance
+
+Phase 9 is significant because it provides a structured economic explanation layer for the protocol-level findings.
+
+The strongest Phase 9 claim is:
+
+The Logic Engine identified deterministic, replay-stable accounting asymmetry patterns involving debt-share residue, residual debt value, and modeled protocol shortfall under supply, borrow, repay, and withdraw sequences.
+
+The strongest constrained Phase 9 direction is not unrestricted extraction.
+
+The strongest constrained direction is:
+
+residual debt survivability and modeled shortfall persistence under repayment-constrained accounting paths.
+
+That matters because the real protocol tests from Phases 4 through 8 already showed amount-sensitive repayment failure, persistent large-repayment failure, and fragmented repayment recovery behavior.
+
+Phase 9 provides economic candidate structures that may help explain or reproduce those patterns in a smaller, cleaner protocol-real proof.
+
+Red-Team Limitations
+
+Phase 9 must be presented carefully.
+
+Phase 9 does not independently prove:
+
+- live protocol exploitability
+- production asset extraction
+- protocol insolvency
+- direct reserve drain
+- cross-user impact
+- live P1 impact
+- real-world bad debt creation
+- enforceable protocol loss
+
+Phase 9 does show:
+
+- deterministic modeled imbalance
+- replay-stable residue
+- phantom debt-share persistence
+- amplification families
+- extraction-path candidates under simulation
+- collapse boundaries
+- constrained shortfall candidates
+- compact reproduction candidates
+
+The key limitation is that Phase 9 remains simulation-layer analysis unless mapped back into the official K2/C4 protocol harness.
+
+Reviewer-Facing Interpretation
+
+Phase 9 should not be framed as final proof of exploit impact by itself.
+
+It should be framed as:
+
+supporting economic analysis that identifies candidate state structures for protocol-level reproduction.
+
+The value of Phase 9 is that it narrows the search space.
+
+Instead of submitting millions of exploratory results, Phase 9 allows the report to say:
+
+A high-volume economic analyzer identified repeatable debt-share residue and modeled shortfall structures. The strongest constrained candidates have been reduced into compact reproduction paths that can now be translated into the official protocol harness.
+
+That is the professional posture.
+
+Professional Conclusion
+
+Phase 9 materially strengthened the investigation by converting broad repayment-boundary observations into structured economic candidate families.
+
+The Logic Engine identified deterministic accounting asymmetry across supply, borrow, repay, and withdraw sequences. Early tests showed fixed residue formation. Later tests showed amplification, signature compression, replay confirmation, long-duration persistence, modeled extraction-path behavior, boundary collapse behavior, and minimal reproduction candidates.
+
+The strongest Phase 9 conclusion is:
+
+The observed repayment asymmetry has repeatable economic structure. Under modeled conditions, the structure produces persistent residual debt, phantom debt-share behavior, and constrained shortfall candidates that can be reduced into compact reproduction paths.
+
+Phase 9 should be treated as a supplemental economic-analysis phase, not as standalone final exploit proof.
+
+Its primary value is that it provides a ranked map of candidate accounting structures for protocol-real reproduction.
+
+The next required step is to translate the strongest constrained minimal candidates into the official K2/C4 harness and verify whether the modeled residual debt and shortfall behavior survives real protocol execution.
