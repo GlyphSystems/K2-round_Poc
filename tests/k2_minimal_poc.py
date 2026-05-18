@@ -1,16 +1,21 @@
-# Retired draft script.
+# Deprecated prototype file.
 #
-# This file is not part of the final Proof of Concept.
+# This script is NOT part of the final executable Proof of Concept.
 #
-# The previous version simulated rounding behavior using standalone Python math.
-# That is useful for internal hypothesis testing, but it does not satisfy the
-# required executable PoC standard because it does not call the target protocol
-# contracts/functions directly.
+# Earlier iterations modeled rounding behavior using isolated Python arithmetic.
+# While useful during preliminary analysis, standalone simulation does not
+# satisfy executable validation requirements because it does not interact
+# directly with protocol contracts or live state transitions.
 #
-# Final validation must be performed through the official K2/C4 test environment
-# using the actual protocol lifecycle:
+# Final validation is performed exclusively through the Foundry-based
+# Solidity test environment using protocol lifecycle execution paths:
 #
 # supply -> borrow -> repay -> withdraw
+#
+# See:
+# tests/AaveV4RoundingBoundary.t.sol
+#
+# This file is intentionally retained only for audit trail continuity.
 
-if name == "main":
-    print("Retired draft script. Not used for final PoC validation.")
+if __name__ == "__main__":
+    print("Deprecated prototype. Not used for final validation.")
