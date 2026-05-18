@@ -1,0 +1,188 @@
+// ---------- PHASE 6C: POST-FAILURE PERSISTENCE PROBE ----------
+
+println!("--- PHASE 6C: POST-FAILURE PERSISTENCE PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 6C CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow succeeded");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+
+        Ok(_) => {
+            println!("repay succeeded");
+        }
+
+        Err(err) => {
+
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- POST-FAILURE PERSISTENCE VALIDATION ---");
+
+// ---------- SNAPSHOT BEFORE RETRY ----------
+
+let before_retry =
+    setup.router.get_user_account_data(&setup.user);
+
+println!(
+    "before retry collateral: {:?}",
+    before_retry.total_collateral_base
+);
+
+println!(
+    "before retry debt: {:?}",
+    before_retry.total_debt_base
+);
+
+println!(
+    "before retry health factor: {:?}",
+    before_retry.health_factor
+);
+
+println!(
+    "before retry asset_a balance: {:?}",
+    setup.asset_a_token.balance(&setup.user)
+);
+
+println!(
+    "before retry asset_b balance: {:?}",
+    setup.asset_b_token.balance(&setup.user)
+);
+
+// ---------- RETRY REPAY ----------
+
+println!("--- RETRY REPAY TEST ---");
+
+let retry_repay_amount: u128 = 1_000_000_000;
+
+let retry_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &retry_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!(
+    "retry_repay_result: {:?}",
+    retry_repay_result
+);
+
+// ---------- SECOND RETRY REPAY ----------
+
+println!("--- SECOND RETRY REPAY TEST ---");
+
+let retry_repay_result_2 = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &retry_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!(
+    "retry_repay_result_2: {:?}",
+    retry_repay_result_2
+);
+
+// ---------- FINAL TELEMETRY ----------
+
+let after_retry =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("================================================");
+println!("--- FINAL POST-FAILURE TELEMETRY ---");
+
+println!(
+    "final collateral: {:?}",
+    after_retry.total_collateral_base
+);
+
+println!(
+    "final debt: {:?}",
+    after_retry.total_debt_base
+);
+
+println!(
+    "final health factor: {:?}",
+    after_retry.health_factor
+);
+
+println!(
+    "final asset_a balance: {:?}",
+    setup.asset_a_token.balance(&setup.user)
+);
+
+println!(
+    "final asset_b balance: {:?}",
+    setup.asset_b_token.balance(&setup.user)
+);
+
+println!(
+    "debt delta after retry: {:?}",
+    after_retry
+        .total_debt_base
+        .saturating_sub(before_retry.total_debt_base)
+);
+
+println!(
+    "collateral delta after retry: {:?}",
+    after_retry
+        .total_collateral_base
+        .saturating_sub(before_retry.total_collateral_base)
+);

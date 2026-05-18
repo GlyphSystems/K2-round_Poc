@@ -1,0 +1,165 @@
+// ---------- PHASE 6A: POST-FAILURE RECOVERY CHECK ----------
+
+println!("--- PHASE 6A: POST-FAILURE RECOVERY CHECK ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+println!("cycles: {:?}", cycles);
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("====================================================");
+    println!("--- PHASE 6A CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow succeeded");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay succeeded");
+        }
+
+        Err(err) => {
+
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("====================================================");
+println!("--- POST-FAILURE RECOVERY OPERATIONS ---");
+
+// ----------------------------------------------------
+// RECOVERY TEST 1 — NEW SUPPLY
+// ----------------------------------------------------
+
+let recovery_supply: u128 = 500_000_000;
+
+println!("--- RECOVERY SUPPLY TEST ---");
+
+let supply_result = setup.router.try_supply(
+    &setup.user,
+    &setup.asset_a,
+    &recovery_supply,
+    &setup.user,
+    &0u32,
+);
+
+println!("supply_result: {:?}", supply_result);
+
+// ----------------------------------------------------
+// RECOVERY TEST 2 — NEW BORROW
+// ----------------------------------------------------
+
+let recovery_borrow: u128 = 100_000_000;
+
+println!("--- RECOVERY BORROW TEST ---");
+
+let borrow_result = setup.router.try_borrow(
+    &setup.user,
+    &setup.asset_b,
+    &recovery_borrow,
+    &1u32,
+    &0u32,
+    &setup.user,
+);
+
+println!("borrow_result: {:?}", borrow_result);
+
+// ----------------------------------------------------
+// RECOVERY TEST 3 — WITHDRAW
+// ----------------------------------------------------
+
+let recovery_withdraw: u128 = 100_000_000;
+
+println!("--- RECOVERY WITHDRAW TEST ---");
+
+let withdraw_result = setup.router.try_withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &recovery_withdraw,
+    &setup.user,
+);
+
+println!("withdraw_result: {:?}", withdraw_result);
+
+// ----------------------------------------------------
+// FINAL ACCOUNT TELEMETRY
+// ----------------------------------------------------
+
+let final_account =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("====================================================");
+println!("--- FINAL ACCOUNT STATE AFTER FAILURE ---");
+
+println!(
+    "final asset_a balance: {:?}",
+    setup.asset_a_token.balance(&setup.user)
+);
+
+println!(
+    "final asset_b balance: {:?}",
+    setup.asset_b_token.balance(&setup.user)
+);
+
+println!(
+    "final collateral: {:?}",
+    final_account.total_collateral_base
+);
+
+println!(
+    "final debt: {:?}",
+    final_account.total_debt_base
+);
+
+println!(
+    "final health factor: {:?}",
+    final_account.health_factor
+);
