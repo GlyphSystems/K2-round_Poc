@@ -1,0 +1,313 @@
+// ---------- PHASE 8C: FORCED LIQUIDATION EXPOSURE PROBE ----------
+
+println!("--- PHASE 8C: FORCED LIQUIDATION EXPOSURE PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 8C SETUP CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- LIQUIDATION EXPOSURE SETUP ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+let withdraw_amount: u128 = 250_000_000;
+
+let mut withdraw_count: u32 = 0;
+let mut withdraw_blocked = false;
+
+for j in 0..20 {
+    println!("================================================");
+    println!("--- COLLATERAL PRESSURE {:?} ---", j + 1);
+
+    let before = setup.router.get_user_account_data(&setup.user);
+
+    println!("before collateral: {:?}", before.total_collateral_base);
+    println!("before debt: {:?}", before.total_debt_base);
+    println!("before health factor: {:?}", before.health_factor);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw result: {:?}", withdraw_result);
+
+    let after = setup.router.get_user_account_data(&setup.user);
+
+    println!("after collateral: {:?}", after.total_collateral_base);
+    println!("after debt: {:?}", after.total_debt_base);
+    println!("after health factor: {:?}", after.health_factor);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    match withdraw_result {
+        Ok(Ok(_)) => {
+            withdraw_count = withdraw_count + 1;
+        }
+
+        _ => {
+            withdraw_blocked = true;
+            println!("withdraw blocked by protocol");
+            break;
+        }
+    }
+}
+
+println!("================================================");
+println!("--- LARGE REPAY DEFENSE ATTEMPT ---");
+
+let before_large_repay = setup.router.get_user_account_data(&setup.user);
+let before_large_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("before large repay collateral: {:?}", before_large_repay.total_collateral_base);
+println!("before large repay debt: {:?}", before_large_repay.total_debt_base);
+println!("before large repay health factor: {:?}", before_large_repay.health_factor);
+println!("before large repay asset_b: {:?}", before_large_asset_b);
+
+let large_repay_amount: u128 = 1_000_000_000;
+
+let large_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &large_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!("large repay result: {:?}", large_repay_result);
+
+let after_large_repay = setup.router.get_user_account_data(&setup.user);
+let after_large_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("after large repay collateral: {:?}", after_large_repay.total_collateral_base);
+println!("after large repay debt: {:?}", after_large_repay.total_debt_base);
+println!("after large repay health factor: {:?}", after_large_repay.health_factor);
+println!("after large repay asset_b: {:?}", after_large_asset_b);
+
+println!(
+    "large repay debt reduction: {:?}",
+    before_large_repay
+        .total_debt_base
+        .saturating_sub(after_large_repay.total_debt_base)
+);
+
+println!(
+    "large repay asset_b spent: {:?}",
+    before_large_asset_b - after_large_asset_b
+);
+
+println!("================================================");
+println!("--- FRAGMENTED REPAY DEFENSE ATTEMPTS ---");
+
+let fragment_amount: u128 = 100_000_000;
+
+let mut fragment_success_count: u32 = 0;
+let mut fragment_failure_count: u32 = 0;
+
+for k in 0..5 {
+    println!("================================================");
+    println!("--- DEFENSE FRAGMENT {:?} ---", k + 1);
+
+    let before = setup.router.get_user_account_data(&setup.user);
+    let before_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("before fragment collateral: {:?}", before.total_collateral_base);
+    println!("before fragment debt: {:?}", before.total_debt_base);
+    println!("before fragment health factor: {:?}", before.health_factor);
+    println!("before fragment asset_b: {:?}", before_asset_b);
+
+    let fragment_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &fragment_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("fragment repay result: {:?}", fragment_result);
+
+    let after = setup.router.get_user_account_data(&setup.user);
+    let after_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("after fragment collateral: {:?}", after.total_collateral_base);
+    println!("after fragment debt: {:?}", after.total_debt_base);
+    println!("after fragment health factor: {:?}", after.health_factor);
+    println!("after fragment asset_b: {:?}", after_asset_b);
+
+    println!(
+        "fragment debt reduction: {:?}",
+        before
+            .total_debt_base
+            .saturating_sub(after.total_debt_base)
+    );
+
+    println!(
+        "fragment asset_b spent: {:?}",
+        before_asset_b - after_asset_b
+    );
+
+    match fragment_result {
+        Ok(_) => {
+            fragment_success_count = fragment_success_count + 1;
+        }
+
+        Err(_) => {
+            fragment_failure_count = fragment_failure_count + 1;
+        }
+    }
+}
+
+println!("================================================");
+println!("--- POST DEFENSE WITHDRAW CHECK ---");
+
+let before_final_withdraw = setup.router.get_user_account_data(&setup.user);
+let before_final_asset_a = setup.asset_a_token.balance(&setup.user);
+
+println!("before final withdraw collateral: {:?}", before_final_withdraw.total_collateral_base);
+println!("before final withdraw debt: {:?}", before_final_withdraw.total_debt_base);
+println!("before final withdraw health factor: {:?}", before_final_withdraw.health_factor);
+println!("before final withdraw asset_a: {:?}", before_final_asset_a);
+
+let final_withdraw_result = setup.router.try_withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &withdraw_amount,
+    &setup.user,
+);
+
+println!("final withdraw result: {:?}", final_withdraw_result);
+
+let after_final_withdraw = setup.router.get_user_account_data(&setup.user);
+let after_final_asset_a = setup.asset_a_token.balance(&setup.user);
+
+println!("after final withdraw collateral: {:?}", after_final_withdraw.total_collateral_base);
+println!("after final withdraw debt: {:?}", after_final_withdraw.total_debt_base);
+println!("after final withdraw health factor: {:?}", after_final_withdraw.health_factor);
+println!("after final withdraw asset_a: {:?}", after_final_asset_a);
+
+println!(
+    "final withdraw collateral delta: {:?}",
+    before_final_withdraw
+        .total_collateral_base
+        .saturating_sub(after_final_withdraw.total_collateral_base)
+);
+
+println!(
+    "final withdraw asset_a delta: {:?}",
+    after_final_asset_a - before_final_asset_a
+);
+
+println!("================================================");
+println!("--- PHASE 8C FINAL TELEMETRY ---");
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("withdraw count: {:?}", withdraw_count);
+println!("withdraw blocked: {:?}", withdraw_blocked);
+println!("fragment success count: {:?}", fragment_success_count);
+println!("fragment failure count: {:?}", fragment_failure_count);
+
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!(
+    "collateral delta from start: {:?}",
+    start_state
+        .total_collateral_base
+        .saturating_sub(final_state.total_collateral_base)
+);
+
+println!(
+    "debt reduction from start: {:?}",
+    start_state
+        .total_debt_base
+        .saturating_sub(final_state.total_debt_base)
+);
+
+println!(
+    "asset_a delta from start: {:?}",
+    final_asset_a - start_asset_a
+);
+
+println!(
+    "asset_b delta from start: {:?}",
+    final_asset_b - start_asset_b
+);

@@ -1,0 +1,256 @@
+// ---------- PHASE 8B: DELAYED STATE SYNC UNLOCK PROBE ----------
+
+println!("--- PHASE 8B: DELAYED STATE SYNC UNLOCK PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 8B SETUP CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- LOW HEALTH COLLATERAL COMPRESSION ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+let withdraw_amount: u128 = 250_000_000;
+
+for j in 0..15 {
+    println!("================================================");
+    println!("--- COLLATERAL COMPRESSION {:?} ---", j + 1);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw result: {:?}", withdraw_result);
+
+    let state = setup.router.get_user_account_data(&setup.user);
+
+    println!("collateral: {:?}", state.total_collateral_base);
+    println!("debt: {:?}", state.total_debt_base);
+    println!("health factor: {:?}", state.health_factor);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    if withdraw_result.is_err() {
+        println!("withdraw rejected during compression");
+        break;
+    }
+}
+
+println!("================================================");
+println!("--- DELAYED STATE SYNC RECOVERY LOOP ---");
+
+let recovery_start = setup.router.get_user_account_data(&setup.user);
+let recovery_start_asset_a = setup.asset_a_token.balance(&setup.user);
+let recovery_start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("recovery start collateral: {:?}", recovery_start.total_collateral_base);
+println!("recovery start debt: {:?}", recovery_start.total_debt_base);
+println!("recovery start health factor: {:?}", recovery_start.health_factor);
+println!("recovery start asset_a balance: {:?}", recovery_start_asset_a);
+println!("recovery start asset_b balance: {:?}", recovery_start_asset_b);
+
+let small_repay_amount: u128 = 100_000_000;
+
+for k in 0..5 {
+    println!("================================================");
+    println!("--- SYNC ROUND {:?} ---", k + 1);
+
+    let before_repay = setup.router.get_user_account_data(&setup.user);
+    let before_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &small_repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("small repay result: {:?}", repay_result);
+
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+    let after_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("before repay debt: {:?}", before_repay.total_debt_base);
+    println!("after repay debt: {:?}", after_repay.total_debt_base);
+    println!("before repay health factor: {:?}", before_repay.health_factor);
+    println!("after repay health factor: {:?}", after_repay.health_factor);
+    println!("before repay asset_b: {:?}", before_repay_asset_b);
+    println!("after repay asset_b: {:?}", after_repay_asset_b);
+
+    println!(
+        "repay debt delta: {:?}",
+        before_repay
+            .total_debt_base
+            .saturating_sub(after_repay.total_debt_base)
+    );
+
+    println!(
+        "repay asset_b delta: {:?}",
+        before_repay_asset_b - after_repay_asset_b
+    );
+
+    println!("--- IMMEDIATE WITHDRAW AFTER REPAY ---");
+
+    let before_withdraw = setup.router.get_user_account_data(&setup.user);
+    let before_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("post repay withdraw result: {:?}", withdraw_result);
+
+    let after_withdraw = setup.router.get_user_account_data(&setup.user);
+    let after_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+
+    println!("before withdraw collateral: {:?}", before_withdraw.total_collateral_base);
+    println!("after withdraw collateral: {:?}", after_withdraw.total_collateral_base);
+    println!("before withdraw debt: {:?}", before_withdraw.total_debt_base);
+    println!("after withdraw debt: {:?}", after_withdraw.total_debt_base);
+    println!("before withdraw health factor: {:?}", before_withdraw.health_factor);
+    println!("after withdraw health factor: {:?}", after_withdraw.health_factor);
+    println!("before withdraw asset_a: {:?}", before_withdraw_asset_a);
+    println!("after withdraw asset_a: {:?}", after_withdraw_asset_a);
+
+    println!(
+        "withdraw collateral delta: {:?}",
+        before_withdraw
+            .total_collateral_base
+            .saturating_sub(after_withdraw.total_collateral_base)
+    );
+
+    println!(
+        "withdraw asset_a delta: {:?}",
+        after_withdraw_asset_a - before_withdraw_asset_a
+    );
+}
+
+println!("================================================");
+println!("--- LARGE REPAY RETEST AFTER SYNC LOOP ---");
+
+let large_repay_amount: u128 = 1_000_000_000;
+
+let large_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &large_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!("large repay result: {:?}", large_repay_result);
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 8B FINAL TELEMETRY ---");
+
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!(
+    "collateral delta from recovery start: {:?}",
+    recovery_start
+        .total_collateral_base
+        .saturating_sub(final_state.total_collateral_base)
+);
+
+println!(
+    "debt reduction from recovery start: {:?}",
+    recovery_start
+        .total_debt_base
+        .saturating_sub(final_state.total_debt_base)
+);
+
+println!(
+    "asset_a delta from recovery start: {:?}",
+    final_asset_a - recovery_start_asset_a
+);
+
+println!(
+    "asset_b delta from recovery start: {:?}",
+    final_asset_b - recovery_start_asset_b
+);
