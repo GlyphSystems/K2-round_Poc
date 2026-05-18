@@ -1,0 +1,162 @@
+// ---------- PHASE 7C: WITHDRAWAL LIMIT ENFORCEMENT PROBE ----------
+
+println!("--- PHASE 7C: WITHDRAWAL LIMIT ENFORCEMENT PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7C CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow succeeded");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay succeeded");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- WITHDRAWAL LIMIT ENFORCEMENT VALIDATION ---");
+
+let start_state =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("start asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+let withdraw_amount: u128 = 250_000_000;
+
+let mut first_withdraw_failure_seen = false;
+
+for j in 0..20 {
+    println!("================================================");
+    println!("--- WITHDRAW LIMIT ATTEMPT {:?} ---", j + 1);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw_result: {:?}", withdraw_result);
+
+    let state =
+        setup.router.get_user_account_data(&setup.user);
+
+    println!("collateral: {:?}", state.total_collateral_base);
+    println!("debt: {:?}", state.total_debt_base);
+    println!("health factor: {:?}", state.health_factor);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    match withdraw_result {
+        Ok(Ok(_)) => {
+            println!("withdraw accepted");
+        }
+
+        _ => {
+            first_withdraw_failure_seen = true;
+            println!("withdraw rejected / boundary reached");
+            break;
+        }
+    }
+}
+
+println!("================================================");
+println!("--- REPAY VALIDATION AFTER WITHDRAW LIMIT PROBE ---");
+
+let repay_after_limit: u128 = 1_000_000_000;
+
+let repay_after_limit_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &repay_after_limit,
+    &1u32,
+    &setup.user,
+);
+
+println!("repay_after_limit_result: {:?}", repay_after_limit_result);
+
+let final_state =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7C FINAL TELEMETRY ---");
+
+println!("withdraw failure seen: {:?}", first_withdraw_failure_seen);
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+println!(
+    "collateral removed from failure state: {:?}",
+    start_state
+        .total_collateral_base
+        .saturating_sub(final_state.total_collateral_base)
+);
+
+println!(
+    "debt delta from failure state: {:?}",
+    final_state
+        .total_debt_base
+        .saturating_sub(start_state.total_debt_base)
+);

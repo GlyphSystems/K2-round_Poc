@@ -1,0 +1,279 @@
+// ---------- PHASE 7K: MULTI FAILURE ROLLBACK MATRIX PROBE ----------
+
+println!("--- PHASE 7K: MULTI FAILURE ROLLBACK MATRIX PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7K SETUP CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- LOW HEALTH SETUP FOR FAILURE MATRIX ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+let withdraw_amount: u128 = 250_000_000;
+
+for j in 0..15 {
+    println!("================================================");
+    println!("--- LOW HEALTH WITHDRAW SETUP {:?} ---", j + 1);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw result: {:?}", withdraw_result);
+
+    let state = setup.router.get_user_account_data(&setup.user);
+
+    println!("collateral: {:?}", state.total_collateral_base);
+    println!("debt: {:?}", state.total_debt_base);
+    println!("health factor: {:?}", state.health_factor);
+    println!("asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    if withdraw_result.is_err() {
+        println!("withdraw setup stopped");
+        break;
+    }
+}
+
+println!("================================================");
+println!("--- MULTI FAILURE ROLLBACK MATRIX START ---");
+
+let matrix_start = setup.router.get_user_account_data(&setup.user);
+let matrix_start_asset_a = setup.asset_a_token.balance(&setup.user);
+let matrix_start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("matrix start collateral: {:?}", matrix_start.total_collateral_base);
+println!("matrix start debt: {:?}", matrix_start.total_debt_base);
+println!("matrix start health factor: {:?}", matrix_start.health_factor);
+println!("matrix start asset_a balance: {:?}", matrix_start_asset_a);
+println!("matrix start asset_b balance: {:?}", matrix_start_asset_b);
+
+let mut failed_repay_count: u32 = 0;
+let mut failed_borrow_count: u32 = 0;
+let mut failed_withdraw_count: u32 = 0;
+
+let failed_repay_amount: u128 = 1_000_000_000;
+let failed_borrow_amount: u128 = 1_000_000_000;
+let failed_withdraw_amount: u128 = 250_000_000;
+
+for k in 0..10 {
+    println!("================================================");
+    println!("--- FAILURE MATRIX ROUND {:?} ---", k + 1);
+
+    // ---------- FAILED REPAY CHECK ----------
+
+    println!("--- MATRIX FAILED REPAY CHECK ---");
+
+    let before_repay = setup.router.get_user_account_data(&setup.user);
+    let before_repay_asset_a = setup.asset_a_token.balance(&setup.user);
+    let before_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &failed_repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("repay result: {:?}", repay_result);
+
+    let after_repay = setup.router.get_user_account_data(&setup.user);
+    let after_repay_asset_a = setup.asset_a_token.balance(&setup.user);
+    let after_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    if repay_result.is_err() {
+        failed_repay_count = failed_repay_count + 1;
+    }
+
+    println!("repay collateral delta: {:?}", after_repay.total_collateral_base.saturating_sub(before_repay.total_collateral_base));
+    println!("repay debt delta: {:?}", after_repay.total_debt_base.saturating_sub(before_repay.total_debt_base));
+    println!("repay asset_a delta: {:?}", after_repay_asset_a - before_repay_asset_a);
+    println!("repay asset_b delta: {:?}", after_repay_asset_b - before_repay_asset_b);
+
+    // ---------- FAILED BORROW CHECK ----------
+
+    println!("--- MATRIX FAILED BORROW CHECK ---");
+
+    let before_borrow = setup.router.get_user_account_data(&setup.user);
+    let before_borrow_asset_a = setup.asset_a_token.balance(&setup.user);
+    let before_borrow_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let borrow_result = setup.router.try_borrow(
+        &setup.user,
+        &setup.asset_b,
+        &failed_borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow result: {:?}", borrow_result);
+
+    let after_borrow = setup.router.get_user_account_data(&setup.user);
+    let after_borrow_asset_a = setup.asset_a_token.balance(&setup.user);
+    let after_borrow_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    if borrow_result.is_err() {
+        failed_borrow_count = failed_borrow_count + 1;
+    }
+
+    println!("borrow collateral delta: {:?}", after_borrow.total_collateral_base.saturating_sub(before_borrow.total_collateral_base));
+    println!("borrow debt delta: {:?}", after_borrow.total_debt_base.saturating_sub(before_borrow.total_debt_base));
+    println!("borrow asset_a delta: {:?}", after_borrow_asset_a - before_borrow_asset_a);
+    println!("borrow asset_b delta: {:?}", after_borrow_asset_b - before_borrow_asset_b);
+
+    // ---------- FAILED WITHDRAW CHECK ----------
+
+    println!("--- MATRIX FAILED WITHDRAW CHECK ---");
+
+    let before_withdraw = setup.router.get_user_account_data(&setup.user);
+    let before_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+    let before_withdraw_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &failed_withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw result: {:?}", withdraw_result);
+
+    let after_withdraw = setup.router.get_user_account_data(&setup.user);
+    let after_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+    let after_withdraw_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    if withdraw_result.is_err() {
+        failed_withdraw_count = failed_withdraw_count + 1;
+    }
+
+    println!("withdraw collateral delta: {:?}", after_withdraw.total_collateral_base.saturating_sub(before_withdraw.total_collateral_base));
+    println!("withdraw debt delta: {:?}", after_withdraw.total_debt_base.saturating_sub(before_withdraw.total_debt_base));
+    println!("withdraw asset_a delta: {:?}", after_withdraw_asset_a - before_withdraw_asset_a);
+    println!("withdraw asset_b delta: {:?}", after_withdraw_asset_b - before_withdraw_asset_b);
+
+    let round_state = setup.router.get_user_account_data(&setup.user);
+
+    println!("round collateral: {:?}", round_state.total_collateral_base);
+    println!("round debt: {:?}", round_state.total_debt_base);
+    println!("round health factor: {:?}", round_state.health_factor);
+    println!("round asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+    println!("round asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+}
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7K FINAL TELEMETRY ---");
+
+println!("failed repay count: {:?}", failed_repay_count);
+println!("failed borrow count: {:?}", failed_borrow_count);
+println!("failed withdraw count: {:?}", failed_withdraw_count);
+
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!(
+    "collateral delta from matrix start: {:?}",
+    final_state
+        .total_collateral_base
+        .saturating_sub(matrix_start.total_collateral_base)
+);
+
+println!(
+    "debt delta from matrix start: {:?}",
+    final_state
+        .total_debt_base
+        .saturating_sub(matrix_start.total_debt_base)
+);
+
+println!(
+    "asset_a delta from matrix start: {:?}",
+    final_asset_a - matrix_start_asset_a
+);
+
+println!(
+    "asset_b delta from matrix start: {:?}",
+    final_asset_b - matrix_start_asset_b
+);

@@ -1,0 +1,158 @@
+// ---------- PHASE 7D: REPAY AMOUNT BOUNDARY SWEEP ----------
+
+println!("--- PHASE 7D: REPAY AMOUNT BOUNDARY SWEEP ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7D CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow succeeded");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay succeeded");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- REPAY AMOUNT BOUNDARY SWEEP START ---");
+
+let start_state =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("start asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+let repay_sweep: [u128; 10] = [
+    1,
+    10,
+    100,
+    1_000,
+    10_000,
+    100_000,
+    1_000_000,
+    10_000_000,
+    100_000_000,
+    1_000_000_000,
+];
+
+for amount in repay_sweep {
+    println!("================================================");
+    println!("--- REPAY SWEEP AMOUNT {:?} ---", amount);
+
+    let before =
+        setup.router.get_user_account_data(&setup.user);
+
+    println!("before debt: {:?}", before.total_debt_base);
+    println!("before collateral: {:?}", before.total_collateral_base);
+    println!("before health factor: {:?}", before.health_factor);
+    println!("before asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("repay_result: {:?}", repay_result);
+
+    let after =
+        setup.router.get_user_account_data(&setup.user);
+
+    println!("after debt: {:?}", after.total_debt_base);
+    println!("after collateral: {:?}", after.total_collateral_base);
+    println!("after health factor: {:?}", after.health_factor);
+    println!("after asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+    println!(
+        "debt changed by: {:?}",
+        before
+            .total_debt_base
+            .saturating_sub(after.total_debt_base)
+    );
+}
+
+println!("================================================");
+println!("--- PHASE 7D FINAL TELEMETRY ---");
+
+let final_state =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+println!(
+    "total debt reduction from start: {:?}",
+    start_state
+        .total_debt_base
+        .saturating_sub(final_state.total_debt_base)
+);
+
+println!(
+    "collateral delta from start: {:?}",
+    final_state
+        .total_collateral_base
+        .saturating_sub(start_state.total_collateral_base)
+);

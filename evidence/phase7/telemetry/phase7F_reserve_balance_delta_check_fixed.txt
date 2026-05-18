@@ -1,0 +1,197 @@
+// ---------- PHASE 7F: RESERVE BALANCE DELTA CHECK FIXED ----------
+
+println!("--- PHASE 7F: RESERVE BALANCE DELTA CHECK FIXED ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7F CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- RESERVE BALANCE DELTA CHECK ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+println!("--- CONTROL LARGE REPAY ATTEMPT ---");
+
+let control_large_repay: u128 = 1_000_000_000;
+
+let control_large_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &control_large_repay,
+    &1u32,
+    &setup.user,
+);
+
+println!("control large repay result: {:?}", control_large_repay_result);
+
+let after_control = setup.router.get_user_account_data(&setup.user);
+let after_control_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("after control collateral: {:?}", after_control.total_collateral_base);
+println!("after control debt: {:?}", after_control.total_debt_base);
+println!("after control health factor: {:?}", after_control.health_factor);
+println!("after control asset_b balance: {:?}", after_control_asset_b);
+
+let fragment_amount: u128 = 100_000_000;
+
+let mut total_debt_reduction: u128 = 0;
+let mut total_asset_b_spent: i128 = 0;
+
+for j in 0..12 {
+    println!("================================================");
+    println!("--- ACCOUNTING DELTA FRAGMENT {:?} ---", j + 1);
+
+    let before = setup.router.get_user_account_data(&setup.user);
+    let before_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("before debt: {:?}", before.total_debt_base);
+    println!("before collateral: {:?}", before.total_collateral_base);
+    println!("before health factor: {:?}", before.health_factor);
+    println!("before asset_b balance: {:?}", before_asset_b);
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &fragment_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("fragment repay result: {:?}", repay_result);
+
+    let after = setup.router.get_user_account_data(&setup.user);
+    let after_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("after debt: {:?}", after.total_debt_base);
+    println!("after collateral: {:?}", after.total_collateral_base);
+    println!("after health factor: {:?}", after.health_factor);
+    println!("after asset_b balance: {:?}", after_asset_b);
+
+    let debt_reduction = before.total_debt_base.saturating_sub(after.total_debt_base);
+    let asset_b_spent = before_asset_b - after_asset_b;
+
+    println!("debt reduction this step: {:?}", debt_reduction);
+    println!("asset_b spent this step: {:?}", asset_b_spent);
+
+    total_debt_reduction = total_debt_reduction.saturating_add(debt_reduction);
+    total_asset_b_spent = total_asset_b_spent.saturating_add(asset_b_spent);
+
+    println!("running total debt reduction: {:?}", total_debt_reduction);
+    println!("running total asset_b spent: {:?}", total_asset_b_spent);
+
+    if repay_result.is_err() {
+        println!("fragment repay failed");
+        break;
+    }
+
+    if after.total_debt_base == 0 {
+        println!("debt fully cleared");
+        break;
+    }
+}
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7F FINAL TELEMETRY ---");
+
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!("total debt reduction tracked: {:?}", total_debt_reduction);
+println!("total asset_b spent tracked: {:?}", total_asset_b_spent);
+
+println!(
+    "net debt reduction from start: {:?}",
+    start_state
+        .total_debt_base
+        .saturating_sub(final_state.total_debt_base)
+);
+
+println!(
+    "net asset_b spent from start: {:?}",
+    start_asset_b - final_asset_b
+);
+
+println!(
+    "collateral delta from start: {:?}",
+    final_state
+        .total_collateral_base
+        .saturating_sub(start_state.total_collateral_base)
+);

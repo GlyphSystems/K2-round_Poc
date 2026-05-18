@@ -1,0 +1,197 @@
+// ---------- PHASE 7A: COLLATERAL EXIT UNDER ACTIVE DEBT ----------
+
+println!("--- PHASE 7A: COLLATERAL EXIT UNDER ACTIVE DEBT ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7A CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow succeeded");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay succeeded");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- ACTIVE DEBT COLLATERAL EXIT VALIDATION ---");
+
+let before_exit =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("before exit collateral: {:?}", before_exit.total_collateral_base);
+println!("before exit debt: {:?}", before_exit.total_debt_base);
+println!("before exit health factor: {:?}", before_exit.health_factor);
+println!("before exit asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("before exit asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+// ---------- WITHDRAW ATTEMPT 1 ----------
+
+let withdraw_1: u128 = 500_000_000;
+
+println!("--- WITHDRAW ATTEMPT 1 ---");
+
+let withdraw_result_1 = setup.router.try_withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &withdraw_1,
+    &setup.user,
+);
+
+println!("withdraw_result_1: {:?}", withdraw_result_1);
+
+let after_withdraw_1 =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("after withdraw 1 collateral: {:?}", after_withdraw_1.total_collateral_base);
+println!("after withdraw 1 debt: {:?}", after_withdraw_1.total_debt_base);
+println!("after withdraw 1 health factor: {:?}", after_withdraw_1.health_factor);
+println!("after withdraw 1 asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("after withdraw 1 asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+// ---------- WITHDRAW ATTEMPT 2 ----------
+
+let withdraw_2: u128 = 500_000_000;
+
+println!("--- WITHDRAW ATTEMPT 2 ---");
+
+let withdraw_result_2 = setup.router.try_withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &withdraw_2,
+    &setup.user,
+);
+
+println!("withdraw_result_2: {:?}", withdraw_result_2);
+
+let after_withdraw_2 =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("after withdraw 2 collateral: {:?}", after_withdraw_2.total_collateral_base);
+println!("after withdraw 2 debt: {:?}", after_withdraw_2.total_debt_base);
+println!("after withdraw 2 health factor: {:?}", after_withdraw_2.health_factor);
+println!("after withdraw 2 asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("after withdraw 2 asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+// ---------- WITHDRAW ATTEMPT 3 ----------
+
+let withdraw_3: u128 = 500_000_000;
+
+println!("--- WITHDRAW ATTEMPT 3 ---");
+
+let withdraw_result_3 = setup.router.try_withdraw(
+    &setup.user,
+    &setup.asset_a,
+    &withdraw_3,
+    &setup.user,
+);
+
+println!("withdraw_result_3: {:?}", withdraw_result_3);
+
+let after_withdraw_3 =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("after withdraw 3 collateral: {:?}", after_withdraw_3.total_collateral_base);
+println!("after withdraw 3 debt: {:?}", after_withdraw_3.total_debt_base);
+println!("after withdraw 3 health factor: {:?}", after_withdraw_3.health_factor);
+println!("after withdraw 3 asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("after withdraw 3 asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+// ---------- REPAY CHECK AFTER COLLATERAL EXIT ----------
+
+println!("--- REPAY CHECK AFTER COLLATERAL EXIT ---");
+
+let repay_after_exit: u128 = 1_000_000_000;
+
+let repay_after_exit_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &repay_after_exit,
+    &1u32,
+    &setup.user,
+);
+
+println!("repay_after_exit_result: {:?}", repay_after_exit_result);
+
+// ---------- FINAL TELEMETRY ----------
+
+let final_account =
+    setup.router.get_user_account_data(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7A FINAL TELEMETRY ---");
+
+println!("final collateral: {:?}", final_account.total_collateral_base);
+println!("final debt: {:?}", final_account.total_debt_base);
+println!("final health factor: {:?}", final_account.health_factor);
+println!("final asset_a balance: {:?}", setup.asset_a_token.balance(&setup.user));
+println!("final asset_b balance: {:?}", setup.asset_b_token.balance(&setup.user));
+
+println!(
+    "collateral delta from failure state: {:?}",
+    before_exit
+        .total_collateral_base
+        .saturating_sub(final_account.total_collateral_base)
+);
+
+println!(
+    "debt delta from failure state: {:?}",
+    final_account
+        .total_debt_base
+        .saturating_sub(before_exit.total_debt_base)
+);

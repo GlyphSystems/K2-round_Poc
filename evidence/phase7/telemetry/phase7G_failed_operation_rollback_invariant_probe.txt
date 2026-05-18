@@ -1,0 +1,266 @@
+// ---------- PHASE 7G: FAILED OPERATION ROLLBACK INVARIANT PROBE ----------
+
+println!("--- PHASE 7G: FAILED OPERATION ROLLBACK INVARIANT PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7G CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- FAILED OPERATION ROLLBACK INVARIANT CHECK ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+// ---------- FAILED LARGE REPAY ROLLBACK CHECK ----------
+
+println!("================================================");
+println!("--- FAILED LARGE REPAY ROLLBACK CHECK ---");
+
+let before_failed_repay = setup.router.get_user_account_data(&setup.user);
+let before_failed_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+let failed_repay_amount: u128 = 1_000_000_000;
+
+let failed_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &failed_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!("failed repay result: {:?}", failed_repay_result);
+
+let after_failed_repay = setup.router.get_user_account_data(&setup.user);
+let after_failed_repay_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("before failed repay collateral: {:?}", before_failed_repay.total_collateral_base);
+println!("after failed repay collateral: {:?}", after_failed_repay.total_collateral_base);
+println!("before failed repay debt: {:?}", before_failed_repay.total_debt_base);
+println!("after failed repay debt: {:?}", after_failed_repay.total_debt_base);
+println!("before failed repay health factor: {:?}", before_failed_repay.health_factor);
+println!("after failed repay health factor: {:?}", after_failed_repay.health_factor);
+println!("before failed repay asset_b: {:?}", before_failed_repay_asset_b);
+println!("after failed repay asset_b: {:?}", after_failed_repay_asset_b);
+
+println!(
+    "failed repay collateral delta: {:?}",
+    after_failed_repay
+        .total_collateral_base
+        .saturating_sub(before_failed_repay.total_collateral_base)
+);
+
+println!(
+    "failed repay debt delta: {:?}",
+    after_failed_repay
+        .total_debt_base
+        .saturating_sub(before_failed_repay.total_debt_base)
+);
+
+println!(
+    "failed repay asset_b delta: {:?}",
+    before_failed_repay_asset_b - after_failed_repay_asset_b
+);
+
+// ---------- PUSH WITHDRAWAL TO FAILURE ----------
+
+println!("================================================");
+println!("--- WITHDRAW UNTIL FAILURE FOR ROLLBACK CHECK ---");
+
+let withdraw_amount: u128 = 250_000_000;
+
+let mut withdraw_failure_seen = false;
+
+for j in 0..20 {
+    println!("================================================");
+    println!("--- WITHDRAW ROLLBACK PRESSURE {:?} ---", j + 1);
+
+    let before_withdraw = setup.router.get_user_account_data(&setup.user);
+    let before_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+    let before_withdraw_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let withdraw_result = setup.router.try_withdraw(
+        &setup.user,
+        &setup.asset_a,
+        &withdraw_amount,
+        &setup.user,
+    );
+
+    println!("withdraw result: {:?}", withdraw_result);
+
+    let after_withdraw = setup.router.get_user_account_data(&setup.user);
+    let after_withdraw_asset_a = setup.asset_a_token.balance(&setup.user);
+    let after_withdraw_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    println!("before withdraw collateral: {:?}", before_withdraw.total_collateral_base);
+    println!("after withdraw collateral: {:?}", after_withdraw.total_collateral_base);
+    println!("before withdraw debt: {:?}", before_withdraw.total_debt_base);
+    println!("after withdraw debt: {:?}", after_withdraw.total_debt_base);
+    println!("before withdraw health factor: {:?}", before_withdraw.health_factor);
+    println!("after withdraw health factor: {:?}", after_withdraw.health_factor);
+    println!("before withdraw asset_a: {:?}", before_withdraw_asset_a);
+    println!("after withdraw asset_a: {:?}", after_withdraw_asset_a);
+    println!("before withdraw asset_b: {:?}", before_withdraw_asset_b);
+    println!("after withdraw asset_b: {:?}", after_withdraw_asset_b);
+
+    match withdraw_result {
+        Ok(Ok(_)) => {
+            println!("withdraw accepted");
+        }
+
+        _ => {
+            withdraw_failure_seen = true;
+
+            println!("withdraw rejected");
+
+            println!(
+                "rejected withdraw collateral delta: {:?}",
+                after_withdraw
+                    .total_collateral_base
+                    .saturating_sub(before_withdraw.total_collateral_base)
+            );
+
+            println!(
+                "rejected withdraw debt delta: {:?}",
+                after_withdraw
+                    .total_debt_base
+                    .saturating_sub(before_withdraw.total_debt_base)
+            );
+
+            println!(
+                "rejected withdraw asset_a delta: {:?}",
+                after_withdraw_asset_a - before_withdraw_asset_a
+            );
+
+            println!(
+                "rejected withdraw asset_b delta: {:?}",
+                after_withdraw_asset_b - before_withdraw_asset_b
+            );
+
+            break;
+        }
+    }
+}
+
+println!("================================================");
+println!("--- FINAL REPAY RETRY AFTER ROLLBACK CHECK ---");
+
+let final_repay_amount: u128 = 1_000_000_000;
+
+let final_repay_result = setup.router.try_repay(
+    &setup.user,
+    &setup.asset_b,
+    &final_repay_amount,
+    &1u32,
+    &setup.user,
+);
+
+println!("final repay result: {:?}", final_repay_result);
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7G FINAL TELEMETRY ---");
+
+println!("withdraw failure seen: {:?}", withdraw_failure_seen);
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!(
+    "collateral removed from start: {:?}",
+    start_state
+        .total_collateral_base
+        .saturating_sub(final_state.total_collateral_base)
+);
+
+println!(
+    "debt delta from start: {:?}",
+    final_state
+        .total_debt_base
+        .saturating_sub(start_state.total_debt_base)
+);
+
+println!(
+    "asset_a delta from start: {:?}",
+    final_asset_a - start_asset_a
+);
+
+println!(
+    "asset_b delta from start: {:?}",
+    final_asset_b - start_asset_b
+);

@@ -1,0 +1,194 @@
+// ---------- PHASE 7J: LONG RUN FAILED REPAY STABILITY PROBE ----------
+
+println!("--- PHASE 7J: LONG RUN FAILED REPAY STABILITY PROBE ---");
+
+let cycles: u32 = 10;
+
+let borrow_pattern: [u128; 3] = [
+    1_000_000_001,
+    1_000_000_003,
+    1_000_000_007,
+];
+
+let repay_pattern: [u128; 3] = [
+    1_000_000_000,
+    1_000_000_002,
+    1_000_000_006,
+];
+
+let mut boundary_hit = false;
+
+for i in 0..cycles {
+    let index = (i % 3) as usize;
+
+    let borrow_amount = borrow_pattern[index];
+    let repay_amount = repay_pattern[index];
+
+    println!("================================================");
+    println!("--- PHASE 7J SETUP CYCLE {:?} ---", i + 1);
+
+    setup.router.borrow(
+        &setup.user,
+        &setup.asset_b,
+        &borrow_amount,
+        &1u32,
+        &0u32,
+        &setup.user,
+    );
+
+    println!("borrow ok");
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    match repay_result {
+        Ok(_) => {
+            println!("repay ok");
+        }
+
+        Err(err) => {
+            boundary_hit = true;
+
+            println!("--- FAILURE BOUNDARY DETECTED ---");
+            println!("cycle: {:?}", i + 1);
+            println!("repay failure: {:?}", err);
+
+            break;
+        }
+    }
+}
+
+assert!(
+    boundary_hit,
+    "expected repayment boundary failure was not reached"
+);
+
+println!("================================================");
+println!("--- LONG RUN FAILED REPAY STABILITY CHECK ---");
+
+let start_state = setup.router.get_user_account_data(&setup.user);
+let start_asset_a = setup.asset_a_token.balance(&setup.user);
+let start_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("start collateral: {:?}", start_state.total_collateral_base);
+println!("start debt: {:?}", start_state.total_debt_base);
+println!("start health factor: {:?}", start_state.health_factor);
+println!("start asset_a balance: {:?}", start_asset_a);
+println!("start asset_b balance: {:?}", start_asset_b);
+
+let failed_repay_amount: u128 = 1_000_000_000;
+
+let mut failed_repay_count: u32 = 0;
+let mut successful_repay_count: u32 = 0;
+
+for j in 0..100 {
+    println!("================================================");
+    println!("--- LONG RUN REPAY ATTEMPT {:?} ---", j + 1);
+
+    let before = setup.router.get_user_account_data(&setup.user);
+    let before_asset_a = setup.asset_a_token.balance(&setup.user);
+    let before_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    let repay_result = setup.router.try_repay(
+        &setup.user,
+        &setup.asset_b,
+        &failed_repay_amount,
+        &1u32,
+        &setup.user,
+    );
+
+    println!("repay result: {:?}", repay_result);
+
+    let after = setup.router.get_user_account_data(&setup.user);
+    let after_asset_a = setup.asset_a_token.balance(&setup.user);
+    let after_asset_b = setup.asset_b_token.balance(&setup.user);
+
+    match repay_result {
+        Ok(_) => {
+            successful_repay_count = successful_repay_count + 1;
+        }
+
+        Err(_) => {
+            failed_repay_count = failed_repay_count + 1;
+        }
+    }
+
+    if (j + 1) % 10 == 0 {
+        println!("--- CHECKPOINT {:?} ---", j + 1);
+        println!("checkpoint collateral: {:?}", after.total_collateral_base);
+        println!("checkpoint debt: {:?}", after.total_debt_base);
+        println!("checkpoint health factor: {:?}", after.health_factor);
+        println!("checkpoint asset_a balance: {:?}", after_asset_a);
+        println!("checkpoint asset_b balance: {:?}", after_asset_b);
+        println!("failed repay count: {:?}", failed_repay_count);
+        println!("successful repay count: {:?}", successful_repay_count);
+    }
+
+    println!(
+        "collateral delta this attempt: {:?}",
+        after
+            .total_collateral_base
+            .saturating_sub(before.total_collateral_base)
+    );
+
+    println!(
+        "debt delta this attempt: {:?}",
+        after
+            .total_debt_base
+            .saturating_sub(before.total_debt_base)
+    );
+
+    println!(
+        "asset_a delta this attempt: {:?}",
+        after_asset_a - before_asset_a
+    );
+
+    println!(
+        "asset_b delta this attempt: {:?}",
+        after_asset_b - before_asset_b
+    );
+}
+
+let final_state = setup.router.get_user_account_data(&setup.user);
+let final_asset_a = setup.asset_a_token.balance(&setup.user);
+let final_asset_b = setup.asset_b_token.balance(&setup.user);
+
+println!("================================================");
+println!("--- PHASE 7J FINAL TELEMETRY ---");
+
+println!("failed repay count: {:?}", failed_repay_count);
+println!("successful repay count: {:?}", successful_repay_count);
+println!("final collateral: {:?}", final_state.total_collateral_base);
+println!("final debt: {:?}", final_state.total_debt_base);
+println!("final health factor: {:?}", final_state.health_factor);
+println!("final asset_a balance: {:?}", final_asset_a);
+println!("final asset_b balance: {:?}", final_asset_b);
+
+println!(
+    "collateral delta from start: {:?}",
+    final_state
+        .total_collateral_base
+        .saturating_sub(start_state.total_collateral_base)
+);
+
+println!(
+    "debt delta from start: {:?}",
+    final_state
+        .total_debt_base
+        .saturating_sub(start_state.total_debt_base)
+);
+
+println!(
+    "asset_a delta from start: {:?}",
+    final_asset_a - start_asset_a
+);
+
+println!(
+    "asset_b delta from start: {:?}",
+    final_asset_b - start_asset_b
+);
