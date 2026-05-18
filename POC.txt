@@ -1,27 +1,48 @@
-K2 Rounding Inconsistency – Minimal Proof of Concept
+K2 Protocol Lifecycle Validation — Proof of Concept Summary
+
 Target: K2 Lending Protocol
 Contest: Code4rena 2026-04 K2
-Repository: https://github.com/code-423n4/2026-04-k2
-Issue Type: Protocol arithmetic / rounding inconsistency
-Sequence: supply → borrow → repay → withdraw
-Summary: This PoC demonstrates a deterministic rounding inconsistency in the K2 lending flow. A full cycle of supply, borrow, repay, and withdraw should return the system to its initial value state. Instead, due to inconsistent rounding behavior across operations, the final value differs from the initial value.
-The PoC follows the required minimal sequence and records exact input/output values.
-Step 1: supply Input: 1000 Output: 999
-Step 2: borrow Input: 500 Output: 500
-Step 3: repay Input: 500 Output: 499
-Step 4: withdraw Input: 999 Output: 999
-Final Calculation: Initial = 1000 Final = 997
-Δ = Final - Initial Δ = 997 - 1000 Δ = -3
-Expected: A complete supply → borrow → repay → withdraw cycle should preserve value.
-Expected result: Δ = 0
-Observed: The cycle produces a non-zero delta.
-Observed result: Δ = -3
-Root Cause: The issue is caused by asymmetric rounding behavior across the protocol flow:
-Supply uses floor rounding
-Borrow uses ceiling-style rounding logic
-Repay uses floor rounding
-Withdraw uses floor multiplication
-Remaining phantom debt residue is converted back into capital loss
-Because the rounding directions do not cancel out across the full cycle, the protocol creates deterministic value drift.
-Impact: This demonstrates measurable value loss after a closed transaction cycle. Repeated cycles may accumulate rounding residue and create accounting imbalance over time.
-Conclusion: The K2 protocol does not preserve value across a full lifecycle interaction because of inconsistent rounding behavior. This PoC confirms Δ ≠ 0 using a minimal reproducible sequence.
+Issue Type: Repayment boundary / amount-sensitive repayment failure
+Primary lifecycle tested: supply → borrow → repay → withdraw
+
+Summary:
+This repository documents a reproducible repayment-boundary condition observed through the official K2/C4 protocol test harness.
+
+The core finding is not based on standalone arithmetic simulation. The protocol-level evidence was produced through executable lifecycle testing using the real K2/C4 harness and protocol calls.
+
+Observed behavior:
+
+- Repeated patterned borrow/repay cycles remain coherent through pre-boundary execution.
+- Debt returns to zero after successful pre-boundary repayments.
+- Collateral remains stable during completed cycles.
+- Health factor returns to max/infinite after successful repayments.
+- At the known boundary window, the larger repayment path fails with UnderlyingTransferFailed / allowance-related behavior.
+- Retry attempts for the larger repayment continue failing after the boundary.
+- Smaller fragmented repayments can still reduce debt.
+- Collateral withdrawal remains available under normal health-factor limits.
+- Health-factor enforcement eventually blocks unsafe withdrawal.
+- Failed operations observed in later validation phases do not mutate state unexpectedly.
+
+Important limitation:
+This repository does not claim direct reserve theft, protocol insolvency, full health-factor bypass, or confirmed unauthorized asset extraction.
+
+Current validated claim:
+The protocol can enter a deterministic post-boundary state where larger repayment attempts fail while active debt remains present, smaller fragmented repayments may still succeed, and collateral operations continue subject to normal health-factor enforcement.
+
+Why this matters:
+Repayment is a core safety path in a lending protocol. If a borrower or integration expects a single larger repayment to restore account health, this boundary condition may create repayment reliability risk, liquidation-defense friction, or recovery-path inconsistency.
+
+Supporting evidence:
+See the evidence folders for phase-separated screenshots, telemetry, summaries, and protocol-harness validation notes.
+
+Primary evidence areas:
+
+- evidence/phase4/
+- evidence/phase5/
+- evidence/phase6/
+- evidence/phase7/
+- evidence/phase8/
+- evidence/phase9_supporting_analysis/
+
+Final note:
+Phase 9 Logic Engine outputs are included only as supplemental economic-analysis artifacts. Final protocol validation should rely on the executable K2/C4 harness evidence from the earlier protocol-level phases.
