@@ -1,0 +1,628 @@
+Phase 8 Summary — Repayment Recovery, Collateral Accessibility, and Liquidation-Adjacent Defense
+
+Objective
+
+Phase 8 was designed to determine whether the repayment-boundary condition identified in earlier phases creates a meaningful recovery or liquidation-adjacent risk after collateral compression.
+
+Prior phases established that repeated patterned borrow/repay cycling can trigger a deterministic large-repayment failure. Phase 7 then showed that, after the boundary condition, collateral withdrawal remains available until normal health-factor limits are reached, while large repayment attempts continue failing and smaller fragmented repayments may still succeed.
+
+Phase 8 moved the investigation into recovery behavior.
+
+The primary questions were:
+
+1. Can repayment recovery restore collateral accessibility after the account reaches a low-health-factor state?
+2. Does collateral remain trapped after debt reduction?
+3. Does the protocol correctly reject unsafe withdrawals after repayment recovery?
+4. Does fragmented repayment restore safety when large repayment fails?
+5. Can a user defend a liquidation-adjacent position if the large repayment path is unavailable?
+6. Does repayment recovery introduce accounting drift, stale-state unlocks, balance inflation, or rollback corruption?
+7. Is the issue better framed as permanent lock, forced liquidation, or amount-sensitive repayment failure with fragmented recovery?
+
+The purpose of Phase 8 was to test the practical recovery implications of the known large-repayment failure boundary.
+
+Test Environment
+
+All Phase 8 tests were executed against the real K2/C4 protocol harness.
+
+Primary test file:
+
+tests/c4/src/lib.rs
+
+Primary command:
+
+cargo test --package k2-c4 -- --nocapture
+
+The tests continued from the previously established repayment-boundary sequence and then applied collateral compression, repayment recovery, and post-recovery withdrawal validation.
+
+Known boundary condition:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+Supporting runtime screenshots are stored in:
+
+screenshots/
+
+Supporting runtime telemetry and text outputs are stored in:
+
+telemetry/
+
+Phase 8A — Trapped Collateral Repayment Lock Probe
+
+Phase 8A tested whether collateral withdrawal and repayment sequencing could create a trapped-state condition where repayment reduces debt, but collateral remains inaccessible afterward.
+
+The test targeted:
+
+progressive collateral reduction under low-health conditions
+recovery attempts through escalating repayment sizes
+post-repayment collateral accessibility
+stale-state persistence after debt reduction
+rollback consistency during repayment failure boundaries
+
+Initial setup telemetry:
+
+starting collateral: 5,000,000,001,000,000,000,000
+starting debt: 1,000,000,001,000,000,000,000
+starting health factor: 4,249,999,999,575,000,004
+starting asset_a balance: 500,000,000
+starting asset_b balance: 11,000,000,010
+
+Collateral reduction sequence:
+
+Collateral reductions 1 through 15 succeeded.
+
+Withdrawal size:
+
+250,000,000
+
+Collateral was progressively reduced from approximately:
+
+4,750,000,000,000,000,000,000
+
+down to:
+
+1,250,000,000,000,000,000,000
+
+Health factor degraded predictably through the withdrawal sequence, ending near:
+
+1,062,499,998,937,500,001
+
+Interpretation of collateral reduction:
+
+The protocol correctly allowed staged collateral reduction while the account remained above enforcement thresholds. Health factor declined deterministically. No collateral duplication, balance drift, premature liquidation, or partial mutation was observed during the reduction sequence.
+
+Recovery starting telemetry:
+
+recovery collateral: 1,250,000,000,000,000,000,000
+recovery debt: 1,000,000,001,000,000,000,000
+recovery health factor: 1,062,499,998,937,500,001
+recovery asset_a balance: 875,000,000
+recovery asset_b balance: 11,000,000,010
+
+Repayment escalation attempts:
+
+1
+10
+1,000
+1,000,000
+1,000,000,000
+
+Successful repayment behavior:
+
+Repayment amount 1:
+
+debt delta: 1
+asset_b delta: 1
+health factor increased from 1,062,499,998,937,500,001 to 1,062,500,000,000,000,000
+
+Repayment amount 10:
+
+debt delta: 10
+health factor increased to 1,062,500,010,625,000,106
+
+Repayment amount 1,000:
+
+debt delta: 1,000
+health factor increased to 1,062,501,073,126,038,557
+
+Repayment amount 1,000,000:
+
+debt delta: 1,000,000
+health factor increased to 1,063,564,638,839,124,351
+
+Repayment amount 1,000,000,000:
+
+debt delta: 1,000,000,000
+health factor increased to 1,181,870,070,844,017,299
+
+Interpretation of repayment escalation:
+
+The protocol correctly reduced debt through successful repayments, recalculated health factor, preserved asset accounting, prevented over-crediting, and preserved collateral integrity. No balance drift was observed during repayment escalation.
+
+Failure boundary detection:
+
+A final repayment attempt crossed the operational boundary and returned:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Critical rollback telemetry:
+
+debt delta: 0
+asset_b delta: 0
+collateral delta: 0
+
+Interpretation:
+
+The failed repayment correctly preserved prior state. The rejected operation did not partially mutate debt, asset_b, or collateral.
+
+Post-recovery collateral access test:
+
+Before final withdrawal:
+
+collateral: 1,250,000,000,000,000,000,000
+debt: 898,999,900,000,000,000,000
+health factor: 1,181,870,070,844,017,299
+
+Withdrawal attempt result:
+
+Err(Ok(HealthFactorTooLow))
+
+Post-withdraw telemetry:
+
+collateral delta: 0
+asset_a delta: 0
+debt unchanged
+balances unchanged
+
+Interpretation:
+
+Phase 8A showed that measurable debt reduction does not automatically restore collateral access. Even after successful repayment improved health factor, the protocol still rejected the final withdrawal with HealthFactorTooLow.
+
+This created the first Phase 8 trapped-collateral signal.
+
+However, this should not be overstated. The protocol may have been correctly enforcing a conservative health-factor boundary. The test did not prove theft, insolvency, unauthorized extraction, debt erasure, balance inflation, or accounting corruption.
+
+Phase 8A’s strongest finding is:
+
+Repayment recovery improved health factor and reduced debt, but collateral withdrawal remained blocked at the tested recovery point.
+
+Result:
+
+Valid edge-state condition observed. No accounting corruption observed. No partial rollback corruption observed. Collateral access remained restricted after measurable debt recovery.
+
+Phase 8B — Delayed State Sync Unlock Probe
+
+Phase 8B tested whether additional repayment recovery could unlock collateral access after a low-health-factor compression state, and whether immediate withdraw attempts after repayment would expose stale-state synchronization issues or collateral bypass.
+
+Test structure:
+
+1. Execute setup borrow/repay cycles.
+2. Reproduce known repayment failure boundary.
+3. Compress collateral through repeated withdrawals.
+4. Enter recovery loop using repeated repayments.
+5. Attempt withdrawal immediately after each repayment.
+6. Validate final large repayment boundary and final telemetry.
+
+Setup result:
+
+The known repayment boundary was reproduced at setup Cycle 10.
+
+Observed:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+Collateral compression:
+
+Collateral was reduced through 15 compression rounds.
+
+Collateral moved from:
+
+5,000,000,000,000,000,000,000
+
+down to:
+
+1,250,000,000,000,000,000,000
+
+Health factor degraded from:
+
+4,249,999,999,575,000,004
+
+down to:
+
+1,062,499,998,937,500,001
+
+Recovery start state:
+
+collateral: 1,250,000,000,000,000,000,000
+debt: 1,000,000,010,000,000,000
+health factor: 1,062,499,998,937,500,001
+asset_a balance: 875,000,000
+asset_b balance: 11,000,000,010
+
+Recovery loop behavior:
+
+Each recovery round attempted repayment followed immediately by collateral withdrawal.
+
+Round 1:
+
+Repay succeeded.
+Debt reduced.
+Health factor increased.
+Immediate withdraw was rejected with HealthFactorTooLow.
+No collateral movement occurred.
+
+Round 2:
+
+Repay succeeded.
+Health factor improved enough to allow withdrawal.
+Immediate withdraw succeeded.
+Collateral reduced from 1,250,000,000,000,000,000,000 to 1,000,000,000,000,000,000,000.
+asset_a increased from 875,000,000 to 900,000,000.
+Health factor recalculated downward after withdrawal.
+
+Round 3:
+
+Repay succeeded.
+Immediate withdraw was rejected with HealthFactorTooLow.
+No collateral movement occurred.
+
+Round 4:
+
+Repay succeeded.
+Immediate withdraw succeeded.
+Collateral reduced from 1,000,000,000,000,000,000,000 to 750,000,000,000,000,000,000.
+asset_a increased from 900,000,000 to 925,000,000.
+
+Round 5:
+
+Repay succeeded.
+Immediate withdraw was rejected with HealthFactorTooLow.
+No additional collateral movement occurred.
+
+Final large repayment retest:
+
+Err(Ok(UnderlyingTransferFailed))
+
+Final telemetry:
+
+final collateral: 750,000,000,000,000,000,000
+final debt: 500,000,010,000,000,000
+final health factor: 1,274,999,997,450,000,005
+final asset_a balance: 925,000,000
+final asset_b balance: 10,500,000,010
+
+Recovery deltas:
+
+collateral delta from recovery start: 500,000,000,000,000,000,000
+debt reduction from recovery start: 500,000,000,000,000,000
+asset_a delta from recovery start: 50,000,000
+asset_b delta from recovery start: -500,000,000
+
+Interpretation:
+
+Phase 8B weakened the trapped-collateral theory from Phase 8A.
+
+The protocol did not show a stale-state collateral bypass. Instead, collateral access became available only after sufficient repayment improved account health. When health factor remained too low, withdrawal was rejected. When repayment improved health factor enough, withdrawal succeeded and accounting updated consistently.
+
+This is important because it shows that collateral was not permanently locked. Access could be restored through additional repayment.
+
+However, Phase 8B also confirmed that the large repayment boundary persisted. The final large repayment attempt still failed with UnderlyingTransferFailed.
+
+Phase 8B’s strongest finding is:
+
+Repayment recovery can restore limited collateral access in controlled stages, but the large repayment failure boundary remains present.
+
+Result:
+
+No stale-state collateral bypass observed. Repayment recovery restored limited collateral access. Large repayment boundary persisted.
+
+Phase 8C — Forced Liquidation Exposure Probe
+
+Phase 8C tested whether a user positioned near liquidation exposure could be prevented from defending their position due to the known large-repayment failure boundary, and whether fragmented repayment could still reduce debt and restore safety.
+
+This test targeted:
+
+forced liquidation exposure after collateral compression
+large repay failure under low-health conditions
+fragmented repay recovery behavior
+post-defense collateral access
+debt/collateral/accounting consistency
+health-factor recalculation after repayment and withdrawal
+whether failed large repayment creates practical user-loss risk
+
+Test structure:
+
+1. Execute setup cycles.
+2. Reproduce known repayment failure boundary.
+3. Apply collateral pressure through repeated withdrawals.
+4. Attempt large repay defense.
+5. Attempt fragmented repay defense.
+6. Attempt post-defense withdrawal.
+7. Capture final telemetry.
+
+Setup result:
+
+The known repayment boundary was reproduced at setup Cycle 10.
+
+Observed:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+Initial exposure state:
+
+collateral: 5,000,000,000,000,000,000,000
+debt: 1,000,000,010,000,000,000,000
+health factor: 4,249,999,999,575,000,004
+asset_a balance: 500,000,000
+asset_b balance: 11,000,000,010
+
+Collateral pressure sequence:
+
+Collateral pressure rounds 1 through 15 succeeded.
+Collateral moved from 5,000,000,000,000,000,000,000 down to 1,250,000,000,000,000,000,000.
+Health factor moved down to approximately 1,062,499,998,937,500,001.
+asset_a increased as collateral was withdrawn.
+Debt remained stable during withdrawal pressure.
+
+At collateral pressure round 16:
+
+withdraw result: Err(Ok(HealthFactorTooLow))
+
+Interpretation:
+
+The protocol correctly blocked further withdrawal once the health-factor safety boundary was reached.
+
+Large repay defense attempt:
+
+large repay result: Err(Ok(UnderlyingTransferFailed))
+
+Large repay impact:
+
+collateral unchanged
+debt unchanged
+health factor unchanged
+asset_b spent: 0
+debt reduction: 0
+
+Interpretation:
+
+The large repayment path failed cleanly and did not mutate state. However, this confirmed that the user could not use the large repayment route as a defense path under this condition.
+
+Fragmented repay defense:
+
+Fragmented repayment was then attempted using smaller chunks.
+
+Observed:
+
+fragment success count: 5
+fragment failure count: 0
+
+Each fragmented repay succeeded and reduced debt by:
+
+100,000,000
+
+Debt moved from:
+
+1,000,000,010,000,000,000,000
+
+down to:
+
+500,000,010,000,000,000,000
+
+Health factor increased across fragments, ending before final withdrawal at approximately:
+
+2,124,999,995,750,000,008
+
+asset_b was spent correctly:
+
+500,000,000 total
+
+Interpretation:
+
+Fragmented repayment successfully defended the position even though the large repayment route failed.
+
+This is a major narrowing result. It weakens a catastrophic forced-liquidation claim because the user still had a working recovery route if repayment was split into smaller fragments.
+
+Post-defense withdrawal check:
+
+After fragmented repayment improved the account, a withdrawal was attempted.
+
+Observed:
+
+final withdraw result: Ok(Ok(250000000))
+
+Post-withdraw effects:
+
+collateral reduced from:
+
+1,250,000,000,000,000,000,000
+
+to:
+
+1,000,000,000,000,000,000,000
+
+asset_a increased by:
+
+250,000,000
+
+health factor recalculated downward to:
+
+1,699,999,996,600,000,006
+
+Final telemetry:
+
+withdraw count: 15
+withdraw blocked: true
+fragment success count: 5
+fragment failure count: 0
+final collateral: 1,000,000,000,000,000,000,000
+final debt: 500,000,010,000,000,000,000
+final health factor: 1,699,999,996,600,000,006
+final asset_a balance: 900,000,000
+final asset_b balance: 10,500,000,010
+collateral delta from start: 4,000,000,000,000,000,000,000
+debt reduction from start: 500,000,000,000,000,000,000
+asset_a delta from start: 400,000,000
+asset_b delta from start: -500,000,000
+
+Interpretation:
+
+Phase 8C confirmed that the large repayment failure boundary persists under liquidation-adjacent pressure.
+
+However, the test also showed that fragmented repayment remains available and successfully reduces debt. After fragmented repayment, the user can restore enough health factor to access collateral safely.
+
+No evidence was observed of:
+
+forced liquidation caused solely by repayment failure
+permanent inability to repay
+permanent trapped collateral
+debt corruption
+collateral corruption
+unauthorized collateral extraction
+balance inflation
+rollback failure
+accounting drift
+health-factor desynchronization
+
+The important finding is precise:
+
+The large repay path fails, but smaller fragmented repayments succeed. The condition is better framed as a repayment-size boundary, operational recovery constraint, or liquidation-defense friction rather than direct fund loss.
+
+Result:
+
+Large repayment failure boundary persists. Fragmented repayment remains a working mitigation. No accounting drift, unauthorized withdrawal, rollback failure, or forced liquidation was confirmed.
+
+Consolidated Phase 8 Findings
+
+Phase 8 materially narrowed the severity and impact interpretation.
+
+Positive findings:
+
+1. The large repayment failure boundary remains reproducible.
+2. Large repayment can fail during recovery and liquidation-adjacent defense.
+3. Debt reduction through repayment can improve health factor.
+4. Fragmented repayment remains available after large repayment failure.
+5. Collateral access can be restored after sufficient fragmented repayment.
+6. The protocol correctly blocks unsafe withdrawals when health factor is too low.
+7. Failed large repayments do not mutate debt, collateral, or asset balances.
+8. Successful repayments reduce debt and improve health factor deterministically.
+9. Successful withdrawals after recovery update collateral, asset_a, and health factor consistently.
+10. The issue is amount-sensitive rather than a total repayment lock.
+
+Negative-control findings:
+
+1. No direct asset theft was observed.
+2. No protocol insolvency was observed.
+3. No unauthorized collateral extraction was observed.
+4. No balance inflation was observed.
+5. No debt erasure was observed.
+6. No accounting corruption was observed.
+7. No rollback failure was observed.
+8. No stale-state collateral bypass was observed.
+9. No permanent trapped-collateral condition was confirmed.
+10. No forced liquidation caused solely by the repayment boundary was confirmed.
+
+Security Significance
+
+Phase 8 is important because it prevents the report from overclaiming while sharpening the real issue.
+
+Before Phase 8, the issue could have been interpreted as:
+
+a persistent repayment lock
+a trapped collateral condition
+a forced liquidation risk
+or a broader recovery-state failure
+
+Phase 8 narrowed that interpretation.
+
+The strongest validated Phase 8 behavior is:
+
+The large repayment path can remain unavailable after the known repayment-boundary condition, including during low-health-factor recovery scenarios, while fragmented smaller repayments can still reduce debt, improve health factor, and restore collateral accessibility.
+
+This means the issue is not a full repayment denial. It is not a total recovery failure. It is not a proven forced-liquidation path.
+
+The best technical framing is:
+
+amount-sensitive large repayment failure after deterministic boundary activation, with fragmented repayment required as a workaround under recovery or liquidation-adjacent conditions.
+
+Impact Framing
+
+The evidence supports the following impact-relevant statements:
+
+A user may be unable to use the expected larger repayment route after the boundary condition.
+Large repayment failure can persist during low-health-factor recovery.
+Fragmented repayment may be required to recover the account.
+If a user or integration expects a single large repayment to restore safety, that route may fail.
+Recovery may require operational knowledge of smaller repayment fragmentation.
+The large-repay failure could create liquidation-defense friction in time-sensitive conditions.
+Collateral access depends on sufficient repayment and health-factor recovery.
+Protocol accounting remains internally consistent under tested recovery paths.
+
+The evidence does not support:
+
+reserve theft
+protocol insolvency
+direct drain behavior
+permanent collateral lock
+complete repayment lock
+forced liquidation by itself
+health-factor bypass
+unauthorized withdrawal
+balance inflation
+failed-operation mutation
+cross-user impact
+
+Red-Team Interpretation
+
+Phase 8 is a credibility phase.
+
+It shows that the investigation is not simply trying to force a severe conclusion. It tested the worst-case recovery theories and narrowed them.
+
+Phase 8A suggested possible collateral access persistence after debt reduction. Phase 8B then weakened that theory by showing that additional repayment can restore limited collateral access. Phase 8C further narrowed the liquidation-risk theory by showing that fragmented repayment can defend the account even when the large repayment route fails.
+
+This is important.
+
+The strongest issue remaining after Phase 8 is not:
+
+permanent lock
+
+The strongest issue is:
+
+large repayment path failure with fragmented repayment workaround
+
+That is still meaningful because repayment reliability is core protocol behavior. A borrower should not need to discover an amount-sensitive fragmented repayment workaround during account recovery or liquidation-adjacent defense.
+
+Relationship to Earlier Phases
+
+Phase 4 discovered the repayment failure boundary.
+
+Phase 5 confirmed that the boundary is reproducible and not caused by pre-boundary account poisoning.
+
+Phase 6 showed that the failure persists across retry attempts while the account remains callable.
+
+Phase 7 showed that collateral withdrawal remains available after failure, health-factor enforcement eventually blocks unsafe withdrawal, and repayment becomes amount-sensitive.
+
+Phase 8 then showed that:
+
+large repayment remains unreliable
+fragmented repayment can still recover debt
+collateral access can be restored after sufficient repayment
+recovery behavior is consistent but operationally constrained
+the condition does not currently prove direct loss or insolvency
+
+Phase 8 therefore narrows the submission into a more defensible recovery-path reliability issue.
+
+Professional Conclusion
+
+Phase 8 successfully tested the recovery and liquidation-adjacent implications of the deterministic large-repayment failure boundary.
+
+The tests confirmed that the large repayment path can remain unavailable after the boundary condition, including during compressed collateral and low-health-factor recovery scenarios. However, fragmented smaller repayments successfully reduced debt, improved health factor, and restored collateral access in controlled stages.
+
+The most important Phase 8 conclusion is:
+
+The issue is not a complete repayment lock or permanent trapped-collateral condition. It is an amount-sensitive large repayment failure where fragmented repayment remains available as a workaround.
+
+This does not eliminate security relevance. It narrows it.
+
+A deterministic large-repayment failure can still matter if users, integrations, bots, liquidation-defense tools, or frontends expect a single larger repayment to restore account health. Under the tested boundary condition, that larger repayment path fails, while fragmented repayment succeeds.
+
+Phase 8 should be presented as a recovery-path and liquidation-adjacent validation phase. It does not prove direct theft, insolvency, or permanent loss. It does prove that the repayment boundary persists under recovery pressure and changes the required recovery behavior from normal larger repayment to fragmented repayment.
