@@ -1,0 +1,404 @@
+Phase 6 Summary — Post-Failure Recovery, Callable State, and Repayment Persistence
+
+Objective
+
+Phase 6 was designed to determine what happens after the deterministic Cycle 10 repayment failure boundary is triggered.
+
+Prior phases established that repeated patterned residual borrow/repay cycling can reliably reach a repayment-path failure around Cycle 10. Phase 5 confirmed that the account remains coherent before the failure boundary and that stopping before the boundary preserves normal account usability.
+
+Phase 6 shifted the investigation from boundary reproduction into post-failure behavior.
+
+The primary questions were:
+
+1. Does the protocol fully halt after the repayment failure?
+2. Does the account remain callable after the failure condition?
+3. Can normal protocol operations continue after the repayment path fails?
+4. Does repayment recover naturally after the first failure?
+5. Does debt remain active after repeated failed repayment attempts?
+6. Does post-failure state mutate unexpectedly during retry attempts?
+
+The purpose of Phase 6 was to determine whether the Cycle 10 repayment boundary is a temporary execution failure, a full account lock, or a persistent repayment-path instability.
+
+Test Environment
+
+All Phase 6 tests were executed against the real K2/C4 protocol harness.
+
+Primary test file:
+
+tests/c4/src/lib.rs
+
+Primary command:
+
+cargo test --package k2-c4 -- --nocapture
+
+The same patterned borrow/repay sequence from prior phases was used to reproduce the known boundary condition.
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+The repayment failure was captured using try_repay() so the test harness could continue executing post-failure validation logic rather than terminating immediately.
+
+Supporting runtime screenshots are stored in:
+
+screenshots/
+
+Supporting runtime telemetry and text outputs are stored in:
+
+telemetry/
+
+Phase 6A — Post-Failure Recovery Check
+
+Phase 6A tested whether the protocol remains operational after the known Cycle 10 repayment boundary failure occurs.
+
+The objective was to determine whether the failure causes:
+
+a full protocol halt
+a full account lock
+partial subsystem degradation
+or continued protocol interaction after repayment instability
+
+Test structure:
+
+Patterned borrow/repay cycles were executed repeatedly.
+Cycles 1–9 completed successfully.
+The known boundary was triggered during Cycle 10 repayment.
+The failure was captured safely using try_repay().
+Post-failure recovery operations were executed immediately after failure detection.
+
+Observed boundary failure:
+
+repay failure: Ok(UnderlyingTransferFailed)
+
+This confirmed that the known repayment boundary remained reproducible.
+
+Important observations:
+
+The system process did not terminate.
+The harness continued executing.
+Contract calls remained available.
+Post-failure recovery operations continued returning responses.
+
+Post-failure recovery test 1 — supply:
+
+supply_result: Ok(Ok(()))
+
+Interpretation:
+
+Supply functionality remained operational after repayment boundary failure. The collateral insertion path survived the failure condition.
+
+Post-failure recovery test 2 — borrow:
+
+borrow_result: Ok(Ok(()))
+
+Interpretation:
+
+Borrow functionality remained operational after repayment boundary failure. The protocol still allowed debt expansion after the repayment instability condition.
+
+Post-failure recovery test 3 — withdraw:
+
+withdraw_result: Ok(Ok(100000000))
+
+Interpretation:
+
+Withdrawal functionality remained operational after repayment boundary failure. Assets could still exit the protocol after the repayment instability condition occurred.
+
+Final account telemetry:
+
+final asset_a balance: 460,000,000
+final asset_b balance: 11,100,000,010
+final collateral: 54,000,000,000,000,000,000
+final debt: 11,000,001,001,000,000,000
+final health factor: 417,272,768,933,884,300
+
+Interpretation:
+
+Phase 6A showed that the repayment failure does not produce a total protocol halt. Instead, the protocol remains callable after the repayment failure. Other subsystems, including supply, borrow, and withdraw, continue responding.
+
+This is an important distinction.
+
+The issue is not simply that one failed repay crashes everything. The more relevant finding is that repayment enters an unstable state while other protocol operations remain available.
+
+Result:
+
+Post-failure protocol interaction remains available after the repayment boundary failure.
+
+Phase 6B — State Desync Validation
+
+Phase 6B tested whether the account enters a callable post-boundary state after the repayment failure and whether additional validation operations can execute without immediately mutating debt or collateral incorrectly.
+
+Test structure:
+
+The test executed 10 repeated borrow/repay cycles.
+
+Cycles 1–9:
+
+borrow succeeded
+repay succeeded
+
+Cycle 10:
+
+borrow succeeded
+repayment boundary triggered
+failure detected as Ok(UnderlyingTransferFailed)
+
+Post-failure validation state:
+
+before collateral: 5,000,000,000,000,000,000,000
+before debt: 1,000,000,100,000,000,000
+before health factor: 4,249,999,995,750,000,004
+
+Validation operations after failure:
+
+small repay test:
+
+Ok(Ok(1))
+
+micro borrow test:
+
+Ok(Ok(()))
+
+Final telemetry:
+
+final collateral: 5,000,000,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 4,249,999,995,750,000,004
+debt delta: 0
+collateral delta: 0
+
+Test harness result:
+
+test result: ok
+1 passed
+0 failed
+finished in approximately 1.04s
+
+Interpretation:
+
+Phase 6B confirmed that the protocol reaches a repayment failure boundary, returns an UnderlyingTransferFailed condition, and remains stable enough for additional validation operations to execute.
+
+The account remains callable after the boundary condition.
+
+The key observation is that the account remains in an active post-boundary state with active debt, while additional calls can still return successful nested results.
+
+This does not show debt or collateral corruption in Phase 6B. Debt delta remained zero. Collateral delta remained zero. The test passed cleanly.
+
+The significance is that the repayment failure does not fully invalidate or lock the account. That creates a post-failure state worth further testing because callable post-failure states can expose recovery-path inconsistencies, stale allowance behavior, amount-sensitive repayment behavior, or cross-operation state issues.
+
+Result:
+
+Callable post-boundary state confirmed, with no collateral or debt delta observed in this test.
+
+Phase 6C — Post-Failure Persistence Probe
+
+Phase 6C tested whether the repayment failure persists after the initial failure or recovers naturally through retry attempts.
+
+This was the most important Phase 6 test.
+
+The objective was to determine:
+
+whether repayment can recover after the first failure
+whether the repayment subsystem remains degraded
+whether debt remains trapped after failure
+whether repeated failed repayment attempts mutate collateral or debt
+whether visible token balance remains available during failed retry attempts
+
+Test configuration:
+
+cycles = 10
+
+Borrow pattern:
+
+1,000,000,001
+1,000,000,003
+1,000,000,007
+
+Repay pattern:
+
+1,000,000,000
+1,000,000,002
+1,000,000,006
+
+Post-failure actions:
+
+capture account telemetry
+attempt retry repay
+attempt second retry repay
+compare debt and collateral deltas after retry attempts
+
+Observed execution:
+
+Cycles 1–9:
+
+borrow succeeded
+repay succeeded
+debt normalized correctly
+health factor restored correctly
+
+Cycle 10:
+
+borrow succeeded
+repay failed with Ok(UnderlyingTransferFailed)
+
+This again confirmed:
+
+deterministic repayment-boundary failure
+reproducible failure window
+repayment-path instability under repeated patterned cycling
+
+Post-failure telemetry before retry:
+
+collateral: 5,000,000,000,000,000,000
+debt: 1,000,000,100,000,000,000
+health factor: 4,249,999,995,750,000,004
+asset_a balance: 5,000,000,000
+asset_b balance: 11,000,000,010
+
+Retry repay test:
+
+retry_repay_result: Err(Ok(UnderlyingTransferFailed))
+
+Second retry repay test:
+
+retry_repay_result_2: Err(Ok(UnderlyingTransferFailed))
+
+Critical observation:
+
+The user visibly retained asset_b balance before retry repayment attempts:
+
+asset_b balance: 11,000,000,010
+
+Despite visible token balance, repeated repay attempts continued failing with:
+
+UnderlyingTransferFailed
+
+Final telemetry:
+
+final collateral: 5,000,000,000,000,000,000
+final debt: 1,000,000,100,000,000,000
+final health factor: 4,249,999,995,750,000,004
+final asset_a balance: 5,000,000,000
+final asset_b balance: 11,000,000,010
+debt delta after retry: 0
+collateral delta after retry: 0
+
+Interpretation:
+
+Phase 6C materially strengthened the repayment-boundary signal.
+
+Prior phases showed that repayment fails at the boundary. Phase 6C showed that the failure persists after the first failure.
+
+The account did not naturally recover through immediate retry attempts. The debt remained active. Collateral did not reconcile. The repayment subsystem continued returning UnderlyingTransferFailed while visible asset_b balance remained available.
+
+This moves the finding beyond a one-time repayment failure signal and into persistent repayment-path instability.
+
+Result:
+
+Persistent repayment failure confirmed after boundary trigger.
+
+Consolidated Phase 6 Findings
+
+Phase 6 established several important findings.
+
+First, the repayment boundary remains reproducible. The Cycle 10 patterned residual sequence again produced UnderlyingTransferFailed.
+
+Second, the protocol does not fully halt after the repayment failure. The harness continues executing and other protocol operations remain callable.
+
+Third, the account remains in an active post-boundary state. Supply, borrow, withdraw, small repay, and micro borrow behaviors were observed after the repayment failure in different Phase 6 probes.
+
+Fourth, the repayment failure persists across retry attempts. Phase 6C showed that retry repay and second retry repay both continued failing with UnderlyingTransferFailed.
+
+Fifth, the user retained visible asset_b balance before retry attempts, but repayment continued failing. This weakens the explanation that the failure is only simple visible balance insufficiency.
+
+Sixth, failed retry attempts did not mutate debt or collateral in the observed telemetry. Debt delta remained zero. Collateral delta remained zero.
+
+Security Significance
+
+Phase 6 is significant because it shows that the repayment failure is not merely a temporary failed call that immediately resolves on retry.
+
+The strongest validated behavior from Phase 6 is:
+
+Repeated patterned residual borrow/repay cycling can deterministically force the account into a persistent repayment failure state where debt remains active and subsequent repay attempts continue failing despite visible user token balance.
+
+This matters because repayment is a core safety function in lending protocols. A persistent repayment failure state can create downstream risk even if no immediate theft, insolvency, or collateral bypass is shown in this phase.
+
+Potential downstream concerns include:
+
+trapped debt states
+inability to restore account health through expected repayment flow
+repayment-path denial behavior
+increased liquidation exposure if repayment cannot proceed normally
+inconsistent recovery behavior after boundary failure
+amount-sensitive repayment behavior
+post-failure interaction asymmetry between repayment and other operations
+
+Phase 6 does not need to assign severity. Its role is to establish the persistent repayment failure behavior and provide the technical basis for later impact testing.
+
+Negative Controls and Limitations
+
+Phase 6 did not show:
+
+direct asset theft
+reserve drain
+protocol insolvency
+collateral inflation
+health-factor bypass
+cross-user impact
+permanent accounting corruption
+unauthorized withdrawal
+bad debt creation
+
+Phase 6 also showed that failed retry attempts preserved debt and collateral deltas in the observed telemetry.
+
+This is important because the issue should not be overstated.
+
+The correct technical interpretation is not:
+
+the protocol is fully broken
+
+The correct technical interpretation is:
+
+the repayment path can enter a persistent failure state after a deterministic boundary trigger while the account remains callable and active debt remains present.
+
+That is a narrower, cleaner, and more defensible claim.
+
+Relationship to Prior and Later Phases
+
+Phase 4 discovered the repayment failure signal.
+
+Phase 5 confirmed that the failure is boundary-specific and that the account remains coherent before the boundary.
+
+Phase 6 showed that after the boundary is triggered:
+
+the protocol remains operational
+the account remains callable
+debt remains active
+repayment retry attempts continue failing
+visible token balance remains present
+collateral and debt do not mutate during failed retries
+
+This made later Phase 7 impact testing necessary. The next logical question became:
+
+If repayment remains failed, what other operations remain available while debt remains active?
+
+That question leads directly into collateral-exit, withdrawal-limit, fragmented-repayment, rollback, low-health-factor, and stale-state probes.
+
+Professional Conclusion
+
+Phase 6 successfully validated persistent post-failure repayment instability after the known Cycle 10 boundary condition.
+
+The tests confirmed that the protocol does not fully halt after the repayment failure. Instead, the account remains callable and other protocol operations continue responding. At the same time, retry repayment attempts continue failing with UnderlyingTransferFailed while active debt remains on the account and visible asset_b balance remains available.
+
+The most important Phase 6 conclusion is:
+
+The Cycle 10 repayment failure is not only reproducible; it can persist after the initial failure and prevent normal retry repayment while active debt remains present.
+
+Phase 6 should be presented as a post-failure persistence and recovery validation phase. It does not independently prove final exploit impact, but it materially strengthens the report by demonstrating that the repayment failure survives retry attempts and creates an active post-boundary state requiring deeper impact analysis.
