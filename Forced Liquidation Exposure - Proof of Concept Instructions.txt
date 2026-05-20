@@ -1,0 +1,11 @@
+The protocol fails to properly block large repayments at the boundary condition, exposing a forced liquidation vulnerability. The attached lib.rs file replaces the default Code4rena test harness to demonstrate this exact failure.
+
+Reproduction Steps:
+
+Replace the existing tests/c4/src/lib.rs file in the main repository with the provided lib.rs file.
+
+Open a terminal and navigate to the root directory of the repository.
+
+Execute the exact following command: cargo test --package k2-c4 -- --nocapture
+
+Observe the terminal output. The test will panic and display the custom assertion: VULNERABILITY PROVED: Repayment boundary failure not triggered.
